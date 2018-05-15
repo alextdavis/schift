@@ -1,0 +1,13 @@
+;Hello!
+
+(let ((x 23)) x)
+
+(quote blergh)
+
+(if (quote jed) (quote hooray) (quote yay)) (quote jed)
+
+(if 10 11 9)
+
+(let ((x 10)) (if #t x -100))
+
+(let ((x "abc")) x)

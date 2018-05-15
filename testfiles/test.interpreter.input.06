@@ -1,0 +1,25 @@
+(let ((x #f) (y 46))
+  (let ((x 42) (z "hi there"))
+    (if x "correct" z)))
+
+(let ((x #f) (y 46))
+ (let ((x 42) (z "hi there"))
+   (if x "correct" z)))
+
+(let ((x #f) (y 46))
+ (let ((x 42) (z "hi there"))
+   y))
+
+(let ((x #f) (y 46))
+ (let ((x 42) (z "hi there"))
+   x))
+
+(let ((x #f) (y 46))
+ (let ((x 42) (z "hi there"))
+   z))
+
+(let ((x #f) (y 46))
+  (if #f
+      "wrong"
+      (let ((x 42) (z "more goodness"))
+        z)))

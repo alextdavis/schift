@@ -1,0 +1,10 @@
+"string";;comment here
+(if #f 1 2)
+(quote "Hello World!")
+(let ((x23!!!!!! (quote "Hi")))  x23!!!!!!)
+(if 23.83 38.32 83.23)
+.99
+99
+-23.8
+(quote (- 2 3))
+(let ((one 23) (two 42) (usps 55057)) (if usps one two))

@@ -1,0 +1,20 @@
+;Eva Grench
+;3/30/18
+;hw1
+
+;Question 1
+;These three lines of code each get the symbol 'mary from the given list
+(car (cdr (cdr ("jane" elizabeth mary kitty lydia))))
+
+;Question 2
+;This function takes in an integer (n) and a list (lst) and returns the first n elements of lst
+(define keep-first-n
+  (lambda (n lst)
+    (cond
+      ;The list is returned when it has the number of items specified
+      ;The entire list is returned if the number of items desired is bigger than the list
+      ((<= (length lst) n) lst)
+      ;An empty list is returned if the user inputs a negative number.
+      ((< n 0) ())
+      ;The recursive call takes in a list that does not have the last item
+      (else (keep-first-n n (reverse (cdr (reverse lst))))))))

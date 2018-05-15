@@ -1,0 +1,13 @@
+(if 70 (if #f 90 -90) x23!!!!!!)
+
+(let ((x 123) (y 456)) (if #t x y))
+
+(let ((blah "abc")) blah)
+
+123
+
+(quote (+ 0 1))
+
+(quote 5)
+
+

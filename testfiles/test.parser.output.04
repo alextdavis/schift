@@ -1,0 +1,1 @@
+(define curry2 (lambda (f )(lambda (x )(lambda (y )(f x y )))))(check-equal? (((curry2 (lambda (x y )(* x y )))7 )5 )35 )(check-equal? (((curry2 (lambda (x y )(- x y )))5 )7 )-2 )(define negate (lambda (predicate )(lambda (x )(not (predicate x )))))(check-equal? ((negate null? )())#f )(check-equal? ((negate integer? )2.500000 )#t )

@@ -1,4 +1,5 @@
 // swift-tools-version:4.0
+
 import PackageDescription
 
 let package = Package(
@@ -27,6 +28,10 @@ let package = Package(
             .testTarget(
                     name: "TokenizerTests",
                     dependencies: ["Interpreter"]
-            )
+            ),
+            .target(
+                    name: "Parser",
+                    dependencies: ["Interpreter"]
+            ),
         ]
 )

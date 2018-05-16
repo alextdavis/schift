@@ -16,7 +16,7 @@ public enum KurtError: Error {
     case Other
 }
 
-extension FileHandle : TextOutputStream {
+extension FileHandle: TextOutputStream {
     public func write(_ string: String) {
         guard let data = string.data(using: .utf8) else { return }
         self.write(data)
@@ -26,7 +26,7 @@ extension FileHandle : TextOutputStream {
 private var standardError = FileHandle.standardError
 
 public func error(_ err: KurtError, _ message: String) {
-    print(message, to:&standardError)
+    print(message, to: &standardError)
     switch err {
     case .Token:
         exit(3)

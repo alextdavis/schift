@@ -18,7 +18,7 @@ enum Value {
     case close
     case symbol(String)
     indirect case cons(car: Value, cdr: Value)
-    
+
     var length: Int {
         switch self {
         case .null:
@@ -30,7 +30,7 @@ enum Value {
             return -1
         }
     }
-    
+
     func reversed() -> Value {
         var reversedList = Value.null
         var oldList = self
@@ -44,6 +44,24 @@ enum Value {
             default:
                 assertionFailure("Tried to reverse non-list")
             }
+        }
+    }
+
+    var car: Value {
+        switch self {
+        case .cons(car: let car, cdr: _):
+            return car
+        default:
+            preconditionFailure("Tried to take the car of a non-cons.")
+        }
+    }
+
+    var cdr: Value {
+        switch self {
+        case .cons(car: _, cdr: let cdr):
+            return cdr
+        default:
+            preconditionFailure("Tried to take the cdr of a non-cons.")
         }
     }
 }

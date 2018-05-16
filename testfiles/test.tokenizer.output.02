@@ -4,10 +4,10 @@
 ):close
 "Hello World!":string
 x23!!!!!!:symbol
-23.830000:double
-0.990000:double
+23.83:double
+0.99:double
 99:integer
--23.800000:double
+-23.8:double
 (:open
 -:symbol
 2:integer

@@ -32,7 +32,7 @@ extension Tokenizer {
 
     private static func isDelineator(_ c: Character?) -> Bool {
         switch c {
-        case "(", ")", "\"", "'", ";", nil: // TODO: Handle EOF
+        case "(", ")", "\"", "'", ";", nil:
             return true
         default:
             return isWhitespace(c)
@@ -229,8 +229,8 @@ extension Tokenizer {
             }
 
             if peekChar() == "." {
-                str.append(".")
                 tokenizeDouble(str)
+                return
             }
             str.append(popChar()!)
         }

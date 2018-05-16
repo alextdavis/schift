@@ -60,7 +60,7 @@ extension Value: CustomStringConvertible {
         case .string(let str):
             return "\"" + str.description + "\""
         case .bool(let bool):
-            return bool.description
+            return bool ? "#t" : "#f"
         case .open:
             return "("
         case .close:

@@ -117,7 +117,7 @@ check-equal?:symbol
 negate:symbol
 integer?:symbol
 ):close
-2.500000:double
+2.5:double
 ):close
 #t:boolean
 ):close

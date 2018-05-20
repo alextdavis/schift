@@ -10,5 +10,10 @@ import Foundation
 import Interpreter
 
 while let line = readLine(strippingNewline: false) {
-    print(Tokenizer(line).jedString, terminator: "")
+    do {
+        try print(Tokenizer(line).jedString, terminator: "")
+    } catch Tokenizer.TokenizerError.other(let msg) {
+        print("\nTokenizer Error: " + msg)
+        break
+    }
 }

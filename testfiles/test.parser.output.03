@@ -1,1 +1,1 @@
-(car (cdr (cdr ("jane" elizabeth mary kitty lydia ))))(define keep-first-n (lambda (n lst )(cond ((<= (length lst )n )lst )((< n 0 )())(else (keep-first-n n (reverse (cdr (reverse lst ))))))))
+(car (cdr (cdr ("jane" elizabeth mary kitty lydia)))) (define keep-first-n (lambda (n lst) (cond ((<= (length lst) n) lst) ((< n 0) ()) (else (keep-first-n n (reverse (cdr (reverse lst))))))))

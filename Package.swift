@@ -13,6 +13,10 @@ let package = Package(
                     name: "Tokenize",
                     targets: ["Tokenize"]
             ),
+            .executable(
+                    name: "Parse",
+                    targets: ["Parse"]
+            )
         ],
         dependencies: [
         ],
@@ -30,8 +34,12 @@ let package = Package(
                     dependencies: ["Interpreter"]
             ),
             .target(
-                    name: "Parser",
-                    dependencies: ["Interpreter"]
+                name: "Parse",
+                dependencies: ["Interpreter"]
+            ),
+            .testTarget(
+                name: "ParserTests",
+                dependencies: ["Interpreter"]
             ),
         ]
 )

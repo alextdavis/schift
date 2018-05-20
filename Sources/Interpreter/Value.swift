@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum Value {
+public enum Value {
     case null
     case int(Int)
     case double(Double)
@@ -19,19 +19,18 @@ enum Value {
     case symbol(String)
     indirect case cons(car: Value, cdr: Value)
 
-    var length: Int {
+    public var length: Int {
         switch self {
         case .null:
             return 0
         case .cons(car: _, cdr: let cdr):
             return 1 + cdr.length
         default:
-            assertionFailure("Can't find the length of a non-list")
-            return -1
+            preconditionFailure("Can't find the length of a non-list")
         }
     }
 
-    func reversed() -> Value {
+    public func reversed() -> Value {
         var reversedList = Value.null
         var oldList = self
         while true {
@@ -42,12 +41,12 @@ enum Value {
                 reversedList = Value.cons(car: car, cdr: reversedList)
                 oldList = cdr
             default:
-                assertionFailure("Tried to reverse non-list")
+                preconditionFailure("Tried to reverse non-list")
             }
         }
     }
 
-    var car: Value {
+    public var car: Value {
         switch self {
         case .cons(car: let car, cdr: _):
             return car
@@ -56,7 +55,7 @@ enum Value {
         }
     }
 
-    var cdr: Value {
+    public var cdr: Value {
         switch self {
         case .cons(car: _, cdr: let cdr):
             return cdr
@@ -67,7 +66,7 @@ enum Value {
 }
 
 extension Value: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         switch self {
         case .null:
             return "()"
@@ -94,10 +93,32 @@ extension Value: CustomStringConvertible {
                     str += car.description + " "
                     cell = cdr
                 case .null:
+                    if str.last == " " {
+                        str.removeLast()
+                    }
                     return str + ")"
                 default:
-                    return str + " . " + cell.description + ")"
+                    return str + ". " + cell.description + ")"
                 }
+            }
+        }
+    }
+}
+
+extension Value {
+    public func toArray() -> [Value]? {
+        var ary = [Value]()
+        var cell = self
+        while true {
+            switch cell {
+            case .null:
+                return ary
+            case .cons(car: let car, cdr: let cdr):
+                ary.append(car)
+                cell = cdr
+            default:
+                assertionFailure("Tried to convert a non-proper list to array.")
+                return nil
             }
         }
     }

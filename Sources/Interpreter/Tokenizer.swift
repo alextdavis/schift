@@ -21,19 +21,6 @@ public final class Tokenizer {
 }
 
 extension Tokenizer {
-    public enum TokenizerError: Error {
-        case other(String)
-
-        public var message: String {
-            switch self {
-            case .other(let str):
-                return str
-            }
-        }
-    }
-}
-
-extension Tokenizer {
     private static func isWhitespace(_ c: Character?) -> Bool {
         switch c {
         case " ", "\n", "\r", "\t":
@@ -137,12 +124,12 @@ extension Tokenizer {
             if (Tokenizer.isDelineator(peekChar())) {
                 array.append(.bool(tf == "t" || tf == "T"))
             } else {
-                throw TokenizerError.other("Boolean literal followed by illegal character.")
+                throw Err.other("Boolean literal followed by illegal character.")
             }
         case nil:
-            throw TokenizerError.other("Found `#` at end of file.")
+            throw Err.other("Found `#` at end of file.")
         default:
-            throw TokenizerError.other("`#` followed by illegal character \(tf!).")
+            throw Err.other("`#` followed by illegal character \(tf!).")
         }
     }
 
@@ -160,9 +147,9 @@ extension Tokenizer {
         case "\"":
             str.append("\"")
         case nil:
-            throw TokenizerError.other("Found `\\` at end of file.")
+            throw Err.other("Found `\\` at end of file.")
         default:
-            throw TokenizerError.other("Unrecognized escape sequence `\\\(c!)`.")
+            throw Err.other("Unrecognized escape sequence `\\\(c!)`.")
         }
     }
 
@@ -179,7 +166,7 @@ extension Tokenizer {
                 continue
             }
             if c == nil {
-                throw TokenizerError.other("Unmatched quote; file ended mid-string.")
+                throw Err.other("Unmatched quote; file ended mid-string.")
             }
             str.append(c!)
             c = popChar()
@@ -201,7 +188,7 @@ extension Tokenizer {
             }
             c = popChar()
             if !Tokenizer.isSymbolSubsequent(c) {
-                throw TokenizerError.other("Illegal character `\(c!)` in symbol `\(sym)`.")
+                throw Err.other("Illegal character `\(c!)` in symbol `\(sym)`.")
             }
             sym.append(c!)
         }
@@ -223,7 +210,7 @@ extension Tokenizer {
         }
 
         guard let dbl = Double(str) else {
-            throw TokenizerError.other("Invalid format for Double: `\(str)`.")
+            throw Err.other("Invalid format for Double: `\(str)`.")
         }
         array.append(.double(dbl))
     }
@@ -248,7 +235,7 @@ extension Tokenizer {
         }
 
         guard let int = Int(str) else {
-            throw TokenizerError.other("Invalid format for Integer: `\(str)`.")
+            throw Err.other("Invalid format for Integer: `\(str)`.")
         }
         array.append(.int(int))
     }
@@ -270,12 +257,10 @@ extension Tokenizer {
 
 extension Tokenizer {
     private func tokenize() throws {
-        var done = false
-        while (!done) {
-            let c = peekChar()
+//        var done = false
+        while let c = peekChar() {
+//            let c = peekChar()
             switch c {
-            case nil:
-                done = true
             case ";":
                 tokenizeComment()
             case "(", ")":
@@ -284,18 +269,18 @@ extension Tokenizer {
                 try tokenizeBool()
             case "\"":
                 try tokenizeString()
-            case _ where Tokenizer.isSymbolInitial(c!):
+            case _ where Tokenizer.isSymbolInitial(c):
                 try tokenizeSymbol()
-            case _ where Tokenizer.isDigit(c!):
+            case _ where Tokenizer.isDigit(c):
                 try tokenizeNumber()
             case ".":
                 try tokenizeDouble()
-            case _ where Tokenizer.isSign(c!):
+            case _ where Tokenizer.isSign(c):
                 try tokenizeSign()
-            case _ where Tokenizer.isWhitespace(c!):
+            case _ where Tokenizer.isWhitespace(c):
                 _ = popChar()
             default:
-                throw TokenizerError.other("Illegal character `\(c!).")
+                throw Err.other("Illegal character `\(c).")
             }
         }
     }

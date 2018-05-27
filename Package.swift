@@ -16,7 +16,11 @@ let package = Package(
             .executable(
                     name: "Parse",
                     targets: ["Parse"]
-            )
+            ),
+            .executable(
+                    name: "REPL",
+                    targets: ["REPL"]
+            ),
         ],
         dependencies: [
         ],
@@ -39,6 +43,10 @@ let package = Package(
             ),
             .testTarget(
                 name: "ParserTests",
+                dependencies: ["Interpreter"]
+            ),
+            .target(
+                name: "REPL",
                 dependencies: ["Interpreter"]
             ),
         ]

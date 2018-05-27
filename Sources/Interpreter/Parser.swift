@@ -15,19 +15,20 @@ public final class Parser {
         case .close:
             depth -= 1
             if depth < 0 {
-                throw ParserError.unmatchedClose
+                throw Err.unmatchedClose
             }
 
             var subTree = Value.null
             while true {
-                if case .open = tree.car {
+                if case .open = try tree.car() {
                     break
                 }
-                subTree = Value.cons(car: tree.car, cdr: subTree)
-                tree = tree.cdr
+                subTree = Value.cons(car: try tree.car(), cdr: subTree)
+                
+                tree = try tree.cdr()
             }
 
-            tree = tree.cdr
+            tree = try tree.cdr()
             tree = Value.cons(car: subTree, cdr: tree)
 
         default:
@@ -44,22 +45,16 @@ public final class Parser {
         }
 
         if depth != 0 {
-            throw ParserError.unmatchedOpen
+            throw Err.unmatchedOpen
         }
 
-        return tree.reversed()
+        return try tree.reversed()
     }
 }
 
 extension Parser {
-    public enum ParserError: Error {
-        case unmatchedOpen, unmatchedClose
-    }
-}
-
-extension Parser {
-    public static func treeToJedString(_ tree: Value) -> String? {
-        return tree.toArray()?.joinedStrings(separator: " ")
+    public static func treeToJedString(_ tree: Value) throws -> String? {
+        return try tree.toArray().joinedStrings(separator: " ")
     }
 }
 

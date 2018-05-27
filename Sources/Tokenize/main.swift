@@ -12,8 +12,8 @@ import Interpreter
 while let line = readLine(strippingNewline: false) {
     do {
         try print(Tokenizer(line).jedString, terminator: "")
-    } catch Tokenizer.TokenizerError.other(let msg) {
-        print("\nTokenizer Error: " + msg)
+    } catch let error as KurtError {
+        print("\nTokenizer Error: " + error.message)
         break
     }
 }

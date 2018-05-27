@@ -10,6 +10,7 @@ import Foundation
 
 public enum Value {
     case null
+    case void
     case int(Int)
     case double(Double)
     case string(String)
@@ -18,19 +19,69 @@ public enum Value {
     case close
     case symbol(String)
     indirect case cons(car: Value, cdr: Value)
+    indirect case closure(formals: Value, body: Value, frame: Frame)
+}
 
-    public var length: Int {
+extension Value {
+    public static func list(_ values: Value...) -> Value {
+        var list = Value.null
+        for value in values.reversed() {
+            list = Value.cons(car: value, cdr: list)
+        }
+        return list
+    }
+}
+
+extension Value {
+    public var isList: Bool {
+        var cell = self
+        while true {
+            switch cell {
+            case .null:
+                return true
+            case .cons(car: _, cdr: let cdr):
+                cell = cdr
+            default:
+                return false
+            }
+        }
+    }
+    
+    public func length() throws -> Int {
+        var cell = self
+        var count = 0
+        while true {
+            switch cell {
+            case .null:
+                return count
+            case .cons(car: _, cdr: let cdr):
+                count += 1
+                cell = cdr
+            default:
+                throw Value.Err.notList
+            }
+        }
+    }
+    
+    public func car() throws -> Value {
         switch self {
-        case .null:
-            return 0
-        case .cons(car: _, cdr: let cdr):
-            return 1 + cdr.length
+        case .cons(car: let car, cdr: _):
+            return car
         default:
-            preconditionFailure("Can't find the length of a non-list")
+            throw Err.notCons(self)
+        }
+    }
+    
+    public func cdr() throws -> Value {
+        switch self {
+        case .cons(car: _, cdr: let cdr):
+            return cdr
+        default:
+            throw Err.notCons(self)
         }
     }
 
-    public func reversed() -> Value {
+    public func reversed() throws -> Value {
         var reversedList = Value.null
         var oldList = self
         while true {
@@ -41,26 +92,8 @@ public enum Value {
                 reversedList = Value.cons(car: car, cdr: reversedList)
                 oldList = cdr
             default:
-                preconditionFailure("Tried to reverse non-list")
+                throw Err.notList
             }
-        }
-    }
-
-    public var car: Value {
-        switch self {
-        case .cons(car: let car, cdr: _):
-            return car
-        default:
-            preconditionFailure("Tried to take the car of a non-cons.")
-        }
-    }
-
-    public var cdr: Value {
-        switch self {
-        case .cons(car: _, cdr: let cdr):
-            return cdr
-        default:
-            preconditionFailure("Tried to take the cdr of a non-cons.")
         }
     }
 }
@@ -70,6 +103,8 @@ extension Value: CustomStringConvertible {
         switch self {
         case .null:
             return "()"
+        case .void:
+            return ""
         case .int(let int):
             return int.description
         case .double(let dbl):
@@ -101,12 +136,41 @@ extension Value: CustomStringConvertible {
                     return str + ". " + cell.description + ")"
                 }
             }
+        case .closure(formals: _, body: _, frame: _):
+            return "#<procedure>"
+        }
+    }
+    
+    public var type: String {
+        switch self {
+        case .null:
+            return "Null"
+        case .void:
+            return "Void"
+        case .int(_):
+            return "Int"
+        case .double(_):
+            return "Double"
+        case .string(_):
+            return "String"
+        case .bool(_):
+            return "Bool"
+        case .open:
+            return "Open"
+        case .close:
+            return "Close"
+        case .symbol(_):
+            return "Symbol"
+        case .cons(car: _, cdr: _):
+            return "Cons"
+        case .closure(formals: _, body: _, frame: _):
+            return "Closure"
         }
     }
 }
 
 extension Value {
-    public func toArray() -> [Value]? {
+    public func toArray() throws -> [Value] {
         var ary = [Value]()
         var cell = self
         while true {
@@ -117,8 +181,7 @@ extension Value {
                 ary.append(car)
                 cell = cdr
             default:
-                assertionFailure("Tried to convert a non-proper list to array.")
-                return nil
+                throw Err.notList
             }
         }
     }

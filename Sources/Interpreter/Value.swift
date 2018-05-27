@@ -19,7 +19,7 @@ public enum Value {
     case close
     case symbol(String)
     indirect case cons(car: Value, cdr: Value)
-    indirect case closure(formals: Value, body: Value, frame: Frame)
+    indirect case procedure(formals: Value, body: Value, frame: Frame)
 }
 
 extension Value {
@@ -136,7 +136,7 @@ extension Value: CustomStringConvertible {
                     return str + ". " + cell.description + ")"
                 }
             }
-        case .closure(formals: _, body: _, frame: _):
+        case .procedure(formals: _, body: _, frame: _):
             return "#<procedure>"
         }
     }
@@ -163,8 +163,8 @@ extension Value: CustomStringConvertible {
             return "Symbol"
         case .cons(car: _, cdr: _):
             return "Cons"
-        case .closure(formals: _, body: _, frame: _):
-            return "Closure"
+        case .procedure(formals: _, body: _, frame: _):
+            return "Procedure"
         }
     }
 }

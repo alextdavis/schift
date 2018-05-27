@@ -67,11 +67,11 @@ public final class Evaluator {
         guard try args.length() == 2 else {
             throw Err.arity(procedure: "lambda", expected: 2, given: try args.length())
         }
-        return try Value.closure(formals: args.car(), body: args.cdr().car(), frame: frame)
+        return try Value.procedure(formals: args.car(), body: args.cdr().car(), frame: frame)
     }
     
     private static func apply(_ proc: Value, args: Value) throws -> Value {
-        guard case .closure(formals: let formals, body: let body, frame: let parentFrame) = proc else {
+        guard case .procedure(formals: let formals, body: let body, frame: let parentFrame) = proc else {
             throw Err.notProc(proc)
         }
         guard args.isList else {
@@ -127,7 +127,7 @@ public final class Evaluator {
             
             // Evaluate procedure
             let proc = try eval(first, frame: frame)
-            guard case .closure(_) = proc else {
+            guard case .procedure(_) = proc else {
                 throw Err.notProc(proc)
             }
             
@@ -151,8 +151,8 @@ public final class Evaluator {
             return try frame.lookup(symbol: sym)
         case .null:
             throw Err.noProc
-        case .void, .open, .close, .closure(formals: _, body: _, frame: _):
-            preconditionFailure("Found Void, Open, Close, or Closure type in Evaluator#eval")
+        case .void, .open, .close, .procedure(formals: _, body: _, frame: _):
+            preconditionFailure("Found Void, Open, Close, or Procedure type in Evaluator#eval")
         }
     }
     

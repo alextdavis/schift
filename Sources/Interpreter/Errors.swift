@@ -13,21 +13,27 @@ public protocol KurtError: Error {
 
 extension Evaluator {
     public enum Err: KurtError {
-        case arity(procedure: String?, expected: Int, given: Int)
+        case arity(procedure: String?, expected: Int, given: Int?)
         case noProc
         case notProc(Value)
         case procArgsNotList
         case invalidFormals
         case specialForm(String)
-        
+
         public var message: String {
             let s = "Evaluation Error: "
             switch self {
             case .arity(procedure: let proc, expected: let exp, given: let given):
-                if proc == nil {
-                    return "Arity Mismatch: The procedure takes \(exp) arguments; \(given) given"
+                var ending: String
+                if given == nil {
+                    ending = "."
                 } else {
-                    return "Arity Mismatch: `\(proc!)` takes \(exp) arguments; \(given) given"
+                    ending = "; \(given!) given"
+                }
+                if proc == nil {
+                    return "Arity Mismatch: The procedure takes \(exp) arguments" + ending
+                } else {
+                    return "Arity Mismatch: `\(proc!)` takes \(exp) arguments" + ending
                 }
             case .noProc:
                 return s + "Missing procedure; probably `()`."
@@ -48,7 +54,7 @@ extension Parser {
     public enum Err: KurtError {
         case unmatchedOpen
         case unmatchedClose
-        
+
         public var message: String {
             let s = "Parser Error: "
             switch self {
@@ -61,12 +67,43 @@ extension Parser {
     }
 }
 
+extension Primitives {
+    public enum Err: KurtError {
+        case arity(procedure: String?, expected: Int, given: Int?)
+        case addNonNumber(Value)
+        case typeError(procedure: String, expected: String, found: Value)
+
+        public var message: String {
+            let s = "Primitive Error: "
+            switch self {
+            case .arity(procedure: let proc, expected: let exp, given: let given):
+                var ending: String
+                if given == nil {
+                    ending = "."
+                } else {
+                    ending = "; \(given!) given"
+                }
+                if proc == nil {
+                    return "Arity Mismatch: The procedure takes \(exp) arguments" + ending
+                } else {
+                    return "Arity Mismatch: `\(proc!)` takes \(exp) arguments" + ending
+                }
+            case .addNonNumber(let val):
+                return s + "Tried to add non-number of type \(val.type)."
+            case .typeError(procedure: let proc, expected: let expected, found: let found):
+                return "Primitive Type Error: \(proc) found value of type \(found.type); " +
+                        "expected \(expected)."
+            }
+        }
+    }
+}
+
 extension Frame {
     public enum Err: KurtError {
         case bindToNonSymbol(Value)
         case lookupNonSymbol(Value)
         case unboundVariable(String)
-        
+
         public var message: String {
             let s = "Frame Error: "
             switch self {
@@ -84,7 +121,7 @@ extension Frame {
 extension Tokenizer {
     public enum Err: KurtError {
         case other(String)
-        
+
         public var message: String {
             let s = "Token Error: "
             switch self {
@@ -99,7 +136,7 @@ extension Value {
     public enum Err: KurtError {
         case notCons(Value)
         case notList
-        
+
         public var message: String {
             let s = "Value Error: "
             switch self {

@@ -1,0 +1,27 @@
+;Eva Grench
+;3/30/18
+;hw1
+
+;Question 1
+;These three lines of code each get the symbol 'mary from the given list
+(define blah (quote (if 2 3 4)))
+
+blah
+
+;Question 2
+;This function takes in an integer (n) and a list (lst) and returns the first n elements of lst
+(define keep-first-n
+  (lambda (n lst)
+    (if #f
+      n
+      (let ((n 10)) n))))
+      
+(keep-first-n 11 "abc")
+
+(define test (lambda () (keep-first-n 12 13)))
+
+(test)
+
+(define weird (lambda (x y z) (if x z y)))
+
+(weird 23 24 25)

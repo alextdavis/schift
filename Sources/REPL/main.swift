@@ -3,16 +3,20 @@ import Interpreter
 var tokens = [Value]()
 
 print("KurtScheme 0.0.1")
-print("KS> ")
+print("KS> ", terminator: "")
+let interpreter = Interpreter()
 while let line = readLine(strippingNewline: false) {
     if line == "exit\n" {
         break
     }
     do {
         try tokens += Tokenizer(line).array
-        try print(Parser.parse(Tokenizer(line).list).jedTreeString, terminator: "")
+        let vals = try interpreter.interpret(Parser.parse(Tokenizer(line).array))
+        for val in vals {
+            print(val)
+        }
     } catch let error as KurtError {
         print(error.message)
     }
-    print("KS> ")
+    print("\nKS> ", terminator: "")
 }

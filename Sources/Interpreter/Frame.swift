@@ -9,40 +9,46 @@
 public final class Frame {
     private var bindings: [String: Value]
     let parent: Frame?
-    
+
     public init(parent: Frame?) {
         self.parent = parent
         self.bindings = [String: Value]()
     }
-    
+
+    public func bind(_ str: String, value: Value) {
+        self.bindings[str] = value
+    }
+
     public func bind(symbol: Value, value: Value) throws {
         guard case .symbol(let sym) = symbol else {
             throw Err.bindToNonSymbol(symbol)
         }
-        self.bindings[sym] = value
+        self.bind(sym, value: value)
     }
-    
-    public func lookup(symbol: String) throws -> Value {
-        var frameOpt: Frame? = self
-        while let frame = frameOpt {
-            if let val = self.bindings[symbol] {
+
+    public func bind(symbol: Value, primitive: @escaping (Value) throws -> Value) throws {
+        guard case .symbol(let sym) = symbol else {
+            throw Err.bindToNonSymbol(symbol)
+        }
+        self.bind(sym, primitive: primitive);
+    }
+
+    public func bind(_ str: String, primitive: @escaping (Value) throws -> Value) {
+        self.bind(str, value: Value.primitive(primitive))
+    }
+
+    public func lookup(symbol: String) -> Value? {
+        return self.bindings[symbol]
+    }
+
+    static public func lookup(_ symbol: String, environment frame: Frame) throws -> Value {
+        var curFrame: Frame? = frame
+        while curFrame != nil {
+            if let val = curFrame?.lookup(symbol: symbol) {
                 return val
             }
-            frameOpt = frame.parent
-
-            /*for binding in try bindings.toArray() {
-                guard case .cons(car: let car, cdr: let cdr) = binding else {
-                    preconditionFailure("Found )
-                }
-                guard case .symbol(let bound) = binding else {
-                    preconditionFailure("Found binding of non-symbol")
-                }
-                if look == bound {
-                    
-                }
-            }*/
+            curFrame = frame.parent
         }
-        
         throw Err.unboundVariable(symbol)
     }
 }

@@ -1,0 +1,8 @@
+;Eva Grench
+;3/30/18
+;hw1
+
+;Question 1
+;These three lines of code each get the symbol 'mary from the given list
+(car (cdr (cdr (quote ("jane" elizabeth mary kitty lydia)))))
+

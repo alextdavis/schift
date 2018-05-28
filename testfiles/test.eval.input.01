@@ -1,0 +1,12 @@
+(define yay (if 23 43 42))
+(if #t yay ":(")
+(define sad ":(" )
+(if "no more PL" sad yay)
+(define jed 23)
+jed
+(define jed "tofu")
+jed
+(define test (lambda (x y) (if x y "no")))
+(test 1 2)
+(if #t "neato" (if 2))
+(test #t "GOO")

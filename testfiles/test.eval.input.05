@@ -1,0 +1,10 @@
+(define foo (lambda (x y) (if x y (foo y "none"))))
+
+(foo #f #t)
+(foo 1 2)
+
+(define do-it (lambda (fun a) (fun a)))
+
+(define variadic (lambda var var))
+
+(do-it variadic (quote (1 2 3)))

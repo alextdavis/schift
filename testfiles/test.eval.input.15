@@ -1,0 +1,35 @@
+(define test-tree (quote (5 (3 () (4 () ())) (6 () ()))))
+
+; Returns a binary tree with no elements.
+(define null-binary-tree
+  (lambda ()
+    (quote ())))
+
+(null-binary-tree)
+
+; Returns the value of the given node.
+(define entry
+  (lambda (node)
+    (car node)))
+
+(entry test-tree)
+
+; Returns the left subtree of the given node.
+(define left
+  (lambda (node)
+    (car (cdr node))))
+
+(left test-tree)
+
+; Returns true if the node is the root of a valid binary tree, otherwise false.
+;(define binary-tree?
+;  (lambda (node)
+;    (cond ((not (list? node)) #f)
+;          ((= (length node) 0) #t)
+;          ((= (length node) 3) (and (binary-tree? (left node))
+;                                    (binary-tree? (right node))
+;                                    (integer? (entry node))))
+;          (else #f))))
+;
+;(binary-tree? test-tree)
+;(binary-tree? (quote (2 5 6)))

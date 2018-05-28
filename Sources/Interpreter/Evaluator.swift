@@ -11,7 +11,7 @@ public final class Evaluator {
     
     private static func evalIf(args: Value, frame: Frame) throws -> Value {
         guard try args.length() == 3 else {
-            throw Err.arity(procedure: "if", expected: 3, given: try args.length())
+            throw Err.arity(procedure: "if", expected: 3, given: try? args.length())
         }
         
         let testResult = try eval(args.car(), frame: frame)
@@ -24,7 +24,7 @@ public final class Evaluator {
     
     private static func evalLet(args: Value, frame parentFrame: Frame) throws -> Value {
         guard try args.length() == 2 else {
-            throw Err.arity(procedure: "let", expected: 2, given: try args.length())
+            throw Err.arity(procedure: "let", expected: 2, given: try? args.length())
         }
         
         let frame = Frame(parent: parentFrame)
@@ -52,7 +52,7 @@ public final class Evaluator {
             throw Err.specialForm("Can't call define from inner context.")
         }
         guard try args.length() == 2 else {
-            throw Err.arity(procedure: "define", expected: 2, given: try args.length())
+            throw Err.arity(procedure: "define", expected: 2, given: try? args.length())
         }
         
         let variable = try args.car()
@@ -65,12 +65,16 @@ public final class Evaluator {
     
     private static func evalLambda(args: Value, frame: Frame) throws -> Value {
         guard try args.length() == 2 else {
-            throw Err.arity(procedure: "lambda", expected: 2, given: try args.length())
+            throw Err.arity(procedure: "lambda", expected: 2, given: try? args.length())
         }
         return try Value.procedure(formals: args.car(), body: args.cdr().car(), frame: frame)
     }
     
     private static func apply(_ proc: Value, args: Value) throws -> Value {
+        if case .primitive(let closure) = proc {
+            return try closure(args)
+        }
+
         guard case .procedure(formals: let formals, body: let body, frame: let parentFrame) = proc else {
             throw Err.notProc(proc)
         }
@@ -84,7 +88,7 @@ public final class Evaluator {
             guard try formals.length() == args.length() else {
                 throw Err.arity(procedure: "#<procedure>",
                                 expected: try! formals.length(),
-                                given: try! args.length())
+                                given: try? args.length())
             }
             
             guard let formalAry = try? formals.toArray(), let actualAry = try? args.toArray() else {
@@ -106,7 +110,7 @@ public final class Evaluator {
     
     static func eval(_ expr: Value, frame: Frame) throws -> Value {
         switch expr {
-        case .int(_), .double(_), .string(_), .bool(_):
+        case .int, .double, .string, .bool:
             return expr
         case .cons(car: let first, cdr: let args):
             // Handle Special Forms
@@ -127,7 +131,10 @@ public final class Evaluator {
             
             // Evaluate procedure
             let proc = try eval(first, frame: frame)
-            guard case .procedure(_) = proc else {
+            switch proc {
+            case .procedure, .primitive:
+                break
+            default:
                 throw Err.notProc(proc)
             }
             
@@ -148,11 +155,12 @@ public final class Evaluator {
             return try apply(proc, args: actuals.reversed())
             
         case .symbol(let sym):
-            return try frame.lookup(symbol: sym)
+            return try Frame.lookup(sym, environment: frame)
         case .null:
             throw Err.noProc
-        case .void, .open, .close, .procedure(formals: _, body: _, frame: _):
-            preconditionFailure("Found Void, Open, Close, or Procedure type in Evaluator#eval")
+        case .void, .open, .close, .procedure, .primitive:
+            preconditionFailure(
+                    "Found Void, Open, Close, Procedure, or Primitive type in Evaluator#eval")
         }
     }
     

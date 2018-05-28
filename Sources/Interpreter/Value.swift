@@ -20,6 +20,7 @@ public enum Value {
     case symbol(String)
     indirect case cons(car: Value, cdr: Value)
     indirect case procedure(formals: Value, body: Value, frame: Frame)
+    case primitive((Value) throws -> Value)
 }
 
 extension Value {
@@ -46,7 +47,16 @@ extension Value {
             }
         }
     }
-    
+
+    public var isNull: Bool {
+        switch self {
+        case .null:
+            return true
+        default:
+            return false
+        }
+    }
+
     public func length() throws -> Int {
         var cell = self
         var count = 0
@@ -62,7 +72,7 @@ extension Value {
             }
         }
     }
-    
+
     public func car() throws -> Value {
         switch self {
         case .cons(car: let car, cdr: _):
@@ -71,7 +81,7 @@ extension Value {
             throw Err.notCons(self)
         }
     }
-    
+
     public func cdr() throws -> Value {
         switch self {
         case .cons(car: _, cdr: let cdr):
@@ -138,9 +148,11 @@ extension Value: CustomStringConvertible {
             }
         case .procedure(formals: _, body: _, frame: _):
             return "#<procedure>"
+        case .primitive(_):
+            return "#<primitive>"
         }
     }
-    
+
     public var type: String {
         switch self {
         case .null:
@@ -165,6 +177,8 @@ extension Value: CustomStringConvertible {
             return "Cons"
         case .procedure(formals: _, body: _, frame: _):
             return "Procedure"
+        case .primitive(_):
+            return "Primitive"
         }
     }
 }
@@ -184,5 +198,13 @@ extension Value {
                 throw Err.notList
             }
         }
+    }
+
+    public init(array ary: [Value]) {
+        var list = Value.null
+        for val in ary {
+            list = Value.cons(car: val, cdr: list)
+        }
+        self = list
     }
 }

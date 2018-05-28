@@ -1,0 +1,16 @@
+(define nest (lambda (a b c) ( lambda (c d e) (if b c a))))
+((nest 1 2 3) 4 5 6)
+
+(define shielding (lambda (a) (lambda (a) (lambda (a) (lambda (a) (if #t a 0))))))
+((((shielding 1) 2) 3) 4)
+
+((lambda (a b) (if (quote can we print 4 more?) a b)) 4 0)
+
+(define cat 4)
+(define and cat)
+(define the and)
+(define hat the)
+(if #t cat 0)
+(if #t and 0)
+(if #t the 0)
+(if #t hat 0)

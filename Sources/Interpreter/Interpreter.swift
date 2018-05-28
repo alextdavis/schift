@@ -15,10 +15,10 @@ public final class Interpreter {
     public func interpret(_ exprs: Value) throws -> Value {
         precondition(exprs.isList, "Interpret takes a list of expressions")
         var vals = Value.null
-        for expr in try! exprs.toArray() {
-            vals = Value.cons(car: try Evaluator.eval(expr, frame: topFrame), cdr: vals)
+        for expr in exprs {
+            vals.prepend(try Evaluator.eval(expr, frame: topFrame))
         }
-        return vals
+        return try vals.reversed()
     }
 
     public func interpret(source: String) throws -> Value {
@@ -29,17 +29,16 @@ public final class Interpreter {
 extension Value {
     public var jedEvalString: String {
         var str = ""
-        var cell = self
-        while true {
-            switch cell {
-            case .cons(car: let car, cdr: let cdr):
-                str += car.description + "\n"
-                cell = cdr
-            case .null:
-                return str
-            default:
-                preconditionFailure("Can't get the jedEvalString of a non-proper list")
+        guard self.isList else {
+            preconditionFailure("Can't get the jedEvalString of a non-proper list")
+        }
+
+        for val in self {
+            let desc = val.description
+            if desc != "" {
+                str += desc + "\n"
             }
         }
+        return str
     }
 }

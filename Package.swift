@@ -29,6 +29,10 @@ let package = Package(
                     name: "Interpreter",
                     dependencies: []
             ),
+            .testTarget(
+                    name: "LinkedListTests",
+                    dependencies: ["Interpreter"]
+            ),
             .target(
                     name: "Tokenize",
                     dependencies: ["Interpreter"]
@@ -48,6 +52,10 @@ let package = Package(
             .target(
                 name: "REPL",
                 dependencies: ["Interpreter"]
+            ),
+            .testTarget(
+                    name: "EvaluatorTests",
+                    dependencies: ["Interpreter"]
             ),
         ]
 )

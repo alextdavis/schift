@@ -280,7 +280,7 @@ extension Tokenizer {
             case _ where Tokenizer.isWhitespace(c):
                 _ = popChar()
             default:
-                throw Err.other("Illegal character `\(c).")
+                throw Err.other("Illegal character `\(c)`.")
             }
         }
     }

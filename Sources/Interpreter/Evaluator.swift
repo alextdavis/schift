@@ -36,12 +36,13 @@ public final class Evaluator {
             throw Err.specialForm("First argument in `let` should be a proper list of bindings.")
         }
         
-        for binding in try bindings.toArray() {
+        for binding in bindings {
             guard try binding.isList && binding.length() == 2 else {
                 throw Err.specialForm("Each binging in `let` must be a proper list of length 2.")
             }
             
-            try frame.bind(symbol: binding.car(), value: binding.cdr().car())
+            try frame.bind(symbol: binding.car(),
+                    value: eval(binding.cdr().car(), frame: parentFrame))
         }
         
         return try eval(body, frame: frame)
@@ -118,6 +119,8 @@ public final class Evaluator {
                 switch sym {
                 case "if":
                     return try evalIf(args: args, frame: frame)
+                case "quote":
+                    return try args.car()
                 case "let":
                     return try evalLet(args: args, frame: frame)
                 case "define":
@@ -139,6 +142,11 @@ public final class Evaluator {
             }
             
             var actuals = Value.null
+            for arg in args {
+                actuals.prepend(try eval(arg, frame: frame))
+            }
+
+            /* Chunk above replaces this:
             var argsCell = args
             argEvalLoop: while true {
                 switch argsCell {
@@ -151,6 +159,7 @@ public final class Evaluator {
                     throw Err.procArgsNotList
                 }
             }
+            */
             
             return try apply(proc, args: actuals.reversed())
             

@@ -47,7 +47,7 @@ public final class Frame {
             if let val = curFrame?.lookup(symbol: symbol) {
                 return val
             }
-            curFrame = frame.parent
+            curFrame = curFrame?.parent
         }
         throw Err.unboundVariable(symbol)
     }

@@ -202,9 +202,39 @@ extension Value {
 
     public init(array ary: [Value]) {
         var list = Value.null
-        for val in ary {
+        for val in ary.reversed() {
             list = Value.cons(car: val, cdr: list)
         }
         self = list
+    }
+
+    public mutating func prepend(_ new: Value) {
+        self = .cons(car: new, cdr: self)
+    }
+}
+
+extension Value: Sequence {
+    public struct ValueIterator: IteratorProtocol {
+        var value: Value
+
+        init(_ value: Value) {
+            self.value = value
+        }
+
+        public mutating func next() -> Value? {
+            switch value {
+            case .null:
+                return nil
+            case .cons(car: let car, cdr: let cdr):
+                defer { value = cdr }
+                return car
+            default:
+                return nil
+            }
+        }
+    }
+
+    public func makeIterator() -> ValueIterator {
+        return ValueIterator(self)
     }
 }

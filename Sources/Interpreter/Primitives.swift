@@ -12,6 +12,23 @@ class Primitives {
             var sumDouble = 0.0
             var isDouble = false
 
+            for arg in args {
+                switch arg {
+                case .int(let int) where !isDouble:
+                    sumInt += int
+                case .double(let dbl) where !isDouble:
+                    sumDouble = Double(sumInt) + dbl
+                    isDouble = true
+                case .double(let dbl) where isDouble:
+                    sumDouble += dbl
+                case .int(let int) where isDouble:
+                    sumDouble += Double(int)
+                default:
+                    throw Err.addNonNumber(arg)
+                }
+            }
+
+            /*
             var consCell: Value = args
             while true {
                 if case .null = consCell {
@@ -33,6 +50,7 @@ class Primitives {
                 }
                 consCell = try! consCell.cdr()
             }
+            */
 
             if isDouble {
                 return Value.double(sumDouble)

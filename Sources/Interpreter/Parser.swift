@@ -61,17 +61,14 @@ extension Parser {
 extension Value {
     public var jedTreeString: String {
         var str = ""
-        var cell = self
-        while true {
-            switch cell {
-            case .cons(car: let car, cdr: let cdr):
-                str += car.description + " "
-                cell = cdr
-            case .null:
-                return str
-            default:
-                preconditionFailure("Can't get the jedTreeString of a non-proper list")
-            }
+
+        guard self.isList else {
+            preconditionFailure("Can't get the jedEvalString of a non-proper list")
         }
+
+        for val in self {
+            str += val.description + " "
+        }
+        return str
     }
 }

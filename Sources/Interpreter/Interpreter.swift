@@ -12,7 +12,7 @@ public final class Interpreter {
         Primitives.bindPrimitives(frame: topFrame)
     }
 
-    public func interpret(_ exprs: Value) throws -> Value {
+    private func interpret(_ exprs: Value) throws -> Value {
         precondition(exprs.isList, "Interpret takes a list of expressions")
         var vals = Value.null
         for expr in exprs {
@@ -23,6 +23,10 @@ public final class Interpreter {
 
     public func interpret(source: String) throws -> Value {
         return try self.interpret(Parser.parse(Tokenizer(source).array))
+    }
+
+    public func interpret(path: String) throws -> Value {
+        return try self.interpret(source: String(contentsOfFile: path))
     }
 }
 

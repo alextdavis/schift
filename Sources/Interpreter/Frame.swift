@@ -37,18 +37,38 @@ public final class Frame {
         self.bind(str, value: Value.primitive(primitive))
     }
 
-    public func lookup(symbol: String) -> Value? {
-        return self.bindings[symbol]
+    public func lookupInSingleFrame(_ str: String) -> Value? {
+        return self.bindings[str]
     }
 
-    static public func lookup(_ symbol: String, environment frame: Frame) throws -> Value {
+    public func lookupInSingleFrame(symbol: Value) throws -> Value? {
+        guard case .symbol(let str) = symbol else {
+            throw Err.lookupNonSymbol(symbol)
+        }
+
+        return lookupInSingleFrame(str)
+    }
+
+    public static func lookup(_ symbol: String, env frame: Frame) throws -> Value {
         var curFrame: Frame? = frame
         while curFrame != nil {
-            if let val = curFrame?.lookup(symbol: symbol) {
+            if let val = curFrame?.lookupInSingleFrame(symbol) {
                 return val
             }
             curFrame = curFrame?.parent
         }
         throw Err.unboundVariable(symbol)
+    }
+
+    public static func setBang(_ str: String, value: Value, env frame: Frame) throws -> Bool {
+        var curFrame: Frame? = frame
+        while curFrame != nil {
+            if frame.bindings[str] != nil {
+                frame.bindings[str] = value
+                return true
+            }
+            curFrame = curFrame?.parent
+        }
+        return false
     }
 }

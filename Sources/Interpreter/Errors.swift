@@ -11,6 +11,37 @@ public protocol KurtError: Error {
     var message: String { get }
 }
 
+protocol KurtErrorPrintable {
+    var kurtErrorMessage: String { get }
+}
+
+extension KurtErrorPrintable {
+    var kurtErrorMessage: String {
+        return String(describing: self)
+    }
+}
+
+extension PartialRangeFrom: KurtErrorPrintable {
+    var kurtErrorMessage: String {
+        return "\(self.lowerBound) or more"
+    }
+}
+
+extension PartialRangeThrough: KurtErrorPrintable {
+    var kurtErrorMessage: String {
+        return "\(self.upperBound) or less"
+    }
+}
+
+extension PartialRangeUpTo: KurtErrorPrintable {
+    var kurtErrorMessage: String {
+        return "up to \(self.upperBound)"
+    }
+}
+
+extension Int: KurtErrorPrintable {}
+
+
 extension Evaluator {
     public enum Err: KurtError {
         case arity(procedure: String?, expected: Int, given: Int?)
@@ -23,7 +54,7 @@ extension Evaluator {
         public var message: String {
             let s = "Evaluation Error: "
             switch self {
-            case .arity(procedure: let proc, expected: let exp, given: let given):
+            case .arity(procedure:let proc, expected:let exp, given:let given):
                 var ending: String
                 if given == nil {
                     ending = "."
@@ -69,30 +100,35 @@ extension Parser {
 
 extension Primitives {
     public enum Err: KurtError {
-        case arity(procedure: String?, expected: Int, given: Int?)
-        case addNonNumber(Value)
+        case arity(procedure: String?, expected: KurtErrorPrintable, given: Int?)
+        case mathNonNumber(Value)
         case typeError(procedure: String, expected: String, found: Value)
+        case divideByZero
 
         public var message: String {
             let s = "Primitive Error: "
             switch self {
-            case .arity(procedure: let proc, expected: let exp, given: let given):
+            case .arity(procedure:let proc, expected:let exp, given:let given):
                 var ending: String
                 if given == nil {
                     ending = "."
                 } else {
-                    ending = "; \(given!) given"
+                    ending = "; \(given!) given."
                 }
                 if proc == nil {
-                    return "Arity Mismatch: The procedure takes \(exp) arguments" + ending
+                    return "Arity Mismatch: The procedure takes \(exp.kurtErrorMessage) arguments"
+                           + ending
                 } else {
-                    return "Arity Mismatch: `\(proc!)` takes \(exp) arguments" + ending
+                    return "Arity Mismatch: `\(proc!)` takes \(exp.kurtErrorMessage) arguments"
+                           + ending
                 }
-            case .addNonNumber(let val):
-                return s + "Tried to add non-number of type \(val.type)."
-            case .typeError(procedure: let proc, expected: let expected, found: let found):
+            case .mathNonNumber(let val):
+                return s + "Tried to perform numeric operation on non-numeric type \(val.type)."
+            case .typeError(procedure:let proc, expected:let expected, found:let found):
                 return "Primitive Type Error: \(proc) found value of type \(found.type); " +
-                        "expected \(expected)."
+                       "expected \(expected)."
+            case .divideByZero:
+                return "Divide By Zero."
             }
         }
     }

@@ -40,7 +40,7 @@ extension Value {
             switch cell {
             case .null:
                 return true
-            case .cons(car: _, cdr: let cdr):
+            case .cons(car:_, cdr:let cdr):
                 cell = cdr
             default:
                 return false
@@ -58,13 +58,13 @@ extension Value {
     }
 
     public func length() throws -> Int {
-        var cell = self
+        var cell  = self
         var count = 0
         while true {
             switch cell {
             case .null:
                 return count
-            case .cons(car: _, cdr: let cdr):
+            case .cons(car:_, cdr:let cdr):
                 count += 1
                 cell = cdr
             default:
@@ -75,7 +75,7 @@ extension Value {
 
     public func car() throws -> Value {
         switch self {
-        case .cons(car: let car, cdr: _):
+        case .cons(car:let car, cdr:_):
             return car
         default:
             throw Err.notCons(self)
@@ -84,7 +84,7 @@ extension Value {
 
     public func cdr() throws -> Value {
         switch self {
-        case .cons(car: _, cdr: let cdr):
+        case .cons(car:_, cdr:let cdr):
             return cdr
         default:
             throw Err.notCons(self)
@@ -93,12 +93,12 @@ extension Value {
 
     public func reversed() throws -> Value {
         var reversedList = Value.null
-        var oldList = self
+        var oldList      = self
         while true {
             switch oldList {
             case .null:
                 return reversedList
-            case .cons(car: let car, cdr: let cdr):
+            case .cons(car:let car, cdr:let cdr):
                 reversedList = Value.cons(car: car, cdr: reversedList)
                 oldList = cdr
             default:
@@ -130,11 +130,11 @@ extension Value: CustomStringConvertible {
         case .symbol(let str):
             return str
         case .cons(car: _, cdr: _):
-            var str = "("
+            var str  = "("
             var cell = self
             while true {
                 switch cell {
-                case .cons(car: let car, cdr: let cdr):
+                case .cons(car:let car, cdr:let cdr):
                     str += car.description + " "
                     cell = cdr
                 case .null:
@@ -183,15 +183,37 @@ extension Value: CustomStringConvertible {
     }
 }
 
+//extension Value {
+//    static func sameType(_ lhs: Value, _ rhs: Value) -> Bool {
+//        switch (lhs, rhs) {
+//        case (.null, .null),
+//             (.void, .void),
+//             (.int, .int),
+//             (.double, .double),
+//             (.string, .string),
+//             (.bool, .bool),
+//             (.open, .open),
+//             (.close, .close),
+//             (.symbol, .symbol),
+//             (.cons, .cons),
+//             (.procedure, .procedure),
+//             (.primitive, .primitive):
+//            return true
+//        default:
+//            return false
+//        }
+//    }
+//}
+
 extension Value {
     public func toArray() throws -> [Value] {
-        var ary = [Value]()
+        var ary  = [Value]()
         var cell = self
         while true {
             switch cell {
             case .null:
                 return ary
-            case .cons(car: let car, cdr: let cdr):
+            case .cons(car:let car, cdr:let cdr):
                 ary.append(car)
                 cell = cdr
             default:
@@ -204,6 +226,14 @@ extension Value {
         var list = Value.null
         for val in ary.reversed() {
             list = Value.cons(car: val, cdr: list)
+        }
+        self = list
+    }
+
+    public init(array ary: [Value], start: Value) {
+        var list = start
+        for val in ary.reversed() {
+            list = .cons(car: val, cdr: list)
         }
         self = list
     }
@@ -225,8 +255,10 @@ extension Value: Sequence {
             switch value {
             case .null:
                 return nil
-            case .cons(car: let car, cdr: let cdr):
-                defer { value = cdr }
+            case .cons(car:let car, cdr:let cdr):
+                defer {
+                    value = cdr
+                }
                 return car
             default:
                 return nil

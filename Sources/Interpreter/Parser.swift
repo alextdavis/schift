@@ -30,25 +30,25 @@ public final class Parser {
 
             tree = try tree.cdr()
 
-            // Implements lil' buddy.
-            let treeCar: Value = try tree.car() // Don't know why this line is necessary
-            if  case .cons = tree, case .quote = treeCar {
-                tree = try tree.cdr()
-                subTree = Value.cons(car: .symbol("quote"),
-                                     cdr: .cons(car: subTree,
-                                                     cdr: .null))
-            }
+//            // Implements lil' buddy. TODO Fix this
+//            let treeCar: Value = try tree.car() // Don't know why this line is necessary
+//            if case .cons = tree, case .quote = treeCar {
+//                tree = try tree.cdr()
+//                subTree = Value.cons(car: .symbol("quote"),
+//                                     cdr: .cons(car: subTree,
+//                                                cdr: .null))
+//            }
 
             tree = Value.cons(car: subTree, cdr: tree)
 
         default:
-            if case .cons = tree, case .quote = try tree.car() {
-                tree = try tree.cdr()
-                var subTree = Value.cons(car: .symbol("quote"),
-                                         cdr: .cons(car: token, cdr: .null))
-                tree = .cons(car: subTree, cdr: tree)
-                return
-            }
+//            if case .cons = tree, case .quote = try tree.car() {
+//                tree = try tree.cdr()
+//                var subTree = Value.cons(car: .symbol("quote"),
+//                                         cdr: .cons(car: token, cdr: .null))
+//                tree = .cons(car: subTree, cdr: tree)
+//                return
+//            }
 
             tree = Value.cons(car: token, cdr: tree)
         }
@@ -58,12 +58,12 @@ public final class Parser {
         var count = 0
         for token in tokens {
             switch token {
-                case .open:
-            count += 1
+            case .open:
+                count += 1
             case .close:
                 count -= 1
             default:
-            break
+                break
             }
 
             if count < 0 {

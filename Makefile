@@ -1,4 +1,4 @@
-.PHONY: build test xcode repl diffs
+.PHONY: build test xcode clean repl diffs
 
 build:
 	swift build
@@ -10,6 +10,9 @@ xcode:
 	osascript -e "tell application \"Xcode\" to quit"
 	swift package generate-xcodeproj
 	open Kurtscheme.xcodeproj
+
+clean:
+	rm -r .build/
 
 repl: build
 	./.build/debug/Schift

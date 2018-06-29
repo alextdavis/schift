@@ -347,12 +347,12 @@ class Primitives {
         }
 
         let argsList = args.dropFirst().first!
-        guard argsList.isList else {
+        guard let argsAry = try? argsList.toArray() else {
             throw Err.typeError(procedure: "apply", expected: "a list of arguments",
                                 found: argsList)
         }
 
-        return try Evaluator.apply(proc, args: argsList)
+        return try Evaluator.apply(proc, actuals: argsAry)
     }
 
     private static func isPair(_ args: [Value]) throws -> Value {

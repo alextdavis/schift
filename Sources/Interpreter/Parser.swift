@@ -20,19 +20,19 @@ public final class Parser {
 
             var subTree = Value.null
             while true {
-                if case .open = try tree.car() {
+                if case .open = try! tree.car() { //TODO: Go through these `try` and move to `try!`
                     break
                 }
-                subTree = .cons(car: try tree.car(), cdr: subTree)
+                subTree.prepend(try! tree.car())
 
                 tree = try! tree.cdr()
             }
 
             tree = try! tree.cdr()
 
-            // Implements lil' buddy. TODO Fix this
+            // Implements lil' buddy.
             if tree.isCons, try! tree.car().isQuote {
-                tree = try tree.cdr()
+                tree = try! tree.cdr()
                 subTree = .cons(car: .symbol("quote"),
                                 cdr: .cons(car: subTree,
                                            cdr: .null))
@@ -84,7 +84,7 @@ public final class Parser {
             throw Err.unmatchedOpen
         }
 
-        return try tree.reversed()
+        return try! tree.reversed()
     }
 }
 

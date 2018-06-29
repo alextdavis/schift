@@ -4,7 +4,7 @@ var tokens = [Value]()
 
 print("KurtScheme 0.0.1")
 print("KS> ", terminator: "")
-let interpreter = Interpreter.instance
+let interpreter = Interpreter.default
 while let line = readLine(strippingNewline: false) {
     if line == "exit\n" {
         break

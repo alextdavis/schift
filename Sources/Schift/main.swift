@@ -20,7 +20,7 @@ func readLine(_ prompt: String) -> String? {
 }
 
 func repl() throws {
-    let ipr = Interpreter.instance
+    let ipr = Interpreter.default
     var tokens = [Value]()
     var lineNo = 0
     print("Schift v0.0.1")
@@ -53,7 +53,7 @@ func repl() throws {
 
 func main() throws {
     if CommandLine.arguments.count > 1 {
-        let ipr = Interpreter.instance
+        let ipr = Interpreter.default
         do {
             for path in CommandLine.arguments.dropFirst() {
                 print(try ipr.interpret(path: path).outputString)
@@ -69,7 +69,8 @@ func main() throws {
         exit(0)
     }
 
-    if isatty(FileHandle.standardInput.fileDescriptor) != 0 {
+    if isatty(FileHandle.standardInput.fileDescriptor) != 0
+       || ProcessInfo.processInfo.environment["INTERACTIVE"] != nil {
         try repl()
     }
 }

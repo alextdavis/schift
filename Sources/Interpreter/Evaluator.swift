@@ -14,11 +14,13 @@ public final class Evaluator {
             throw Err.arity(procedure: "if", expected: 3, given: args.count)
         }
 
-        let testResult = try eval(args[0], frame: frame)
+        let (test, conseq, alt) = args.firstThree!
+
+        let testResult = try eval(test, frame: frame)
         if case .bool(false) = testResult {
-            return try eval(args[2], frame: frame)
+            return try eval(conseq, frame: frame)
         } else {
-            return try eval(args[1], frame: frame)
+            return try eval(alt, frame: frame)
         }
     }
 
@@ -30,8 +32,7 @@ public final class Evaluator {
             throw Err.arity(procedure: "let", expected: 2, given: args.count)
         }
 
-        let bindings = args[0]
-        let body = args[1]
+        let (bindings, body) = args.firstTwo!
 
         guard bindings.isList else {
             throw Err.specialForm("First argument in `let` should be a proper list of bindings.")
@@ -44,8 +45,7 @@ public final class Evaluator {
                 throw Err.specialForm("Each binging in `let` must be a proper list of length 2.")
             }
 
-            let x = ary[0]
-            let e = ary[1]
+            let (x, e) = ary.firstTwo!
 
             guard try frame.lookupInSingleFrame(symbol: x) == nil else {
                 throw Err.specialForm("Duplicate identifier in `let`: `\(x)`")
@@ -73,8 +73,8 @@ public final class Evaluator {
             throw Err.arity(procedure: "define", expected: 2, given: args.count)
         }
 
-        let variable = args[0]
-        let expr = args[1]
+        let (variable, expr) = args.firstTwo!
+
         let val = try eval(expr, frame: frame)
         try frame.bind(symbol: variable, value: val)
 
@@ -85,7 +85,10 @@ public final class Evaluator {
         guard args.count == 2 else {
             throw Err.arity(procedure: "lambda", expected: 2, given: args.count)
         }
-        return Value.procedure(formals: args[0], body: args[1], frame: frame)
+
+        let (formals, body) = args.firstTwo!
+
+        return Value.procedure(formals: formals, body: body, frame: frame)
     }
 
     private static func evaLand(_ args: [Value], _ frame: Frame) throws -> Value {
@@ -116,13 +119,11 @@ public final class Evaluator {
 
     private static func evalCond(_ args: [Value], _ frame: Frame) throws -> Value {
         for i in args.indices {
-            let arg = args[i]
-            guard arg.isList, try arg.length() == 2 else {
+            guard let arg = try? args[i].toArray(), arg.count == 2 else {
                 throw Err.specialForm("Each argument to `cond` must be a proper list of length 2.")
             }
 
-            let test = try arg.car()
-            let conseq = try arg.cdr().car()
+            let (test, conseq) = arg.firstTwo!
 
             if case .symbol(let str) = test, str == "else" {
                 if i != args.index(before: args.endIndex) {
@@ -148,8 +149,7 @@ public final class Evaluator {
             throw Err.arity(procedure: "set!", expected: 2, given: args.count)
         }
 
-        let variable = args[0]
-        let expr = args[1]
+        let (variable, expr) = args.firstTwo!
 
         guard case .symbol(let str) = variable else {
             throw Err.specialForm("`set!` expects a symbol as the first argument.")
@@ -163,11 +163,15 @@ public final class Evaluator {
     }
 
     private static func evalBegin(_ args: [Value], _ frame: Frame) throws -> Value {
-        var result = Value.void
-        for arg in args {
-            result = try eval(arg, frame: frame)
+        if args.count == 0 {
+            return .void
         }
-        return result
+
+        for arg in args.dropLast() {
+            try eval(arg, frame: frame)
+        }
+
+        return try eval(args.last!, frame: frame)
     }
 
     static func apply(_ proc: Value, actuals: [Value]) throws -> Value {
@@ -175,20 +179,15 @@ public final class Evaluator {
             return try closure(actuals)
         }
 
-        guard case .procedure(formals:let formals,
-                              body:let body,
-                              frame:let parentFrame) = proc else {
+        guard case .procedure(formals: let formals,
+                              body: let body,
+                              frame: let parentFrame) = proc else {
             throw Err.notProc(proc)
         }
-//        guard args.isList else {
-//            throw Err.procArgsNotList
-//        }
 
         let newFrame = Frame(parent: parentFrame)
 
         if let formalAry = try? formals.toArray() {
-//            let actualAry = try! args.toArray()
-
             guard formalAry.count == actuals.count else {
                 throw Err.arity(procedure: "#<procedure>", //TODO: Include procedure name?
                                 expected: formalAry.count,
@@ -212,7 +211,7 @@ public final class Evaluator {
         switch expr {
         case .int, .double, .string, .bool:
             return expr
-        case .cons(car:let first, cdr:let cdr):
+        case .cons(car: let first, cdr: let cdr):
             let args = try! cdr.toArray()
 
             // Handle Special Forms

@@ -12,3 +12,19 @@ extension Array where Element: CustomStringConvertible {
         return self.map({ $0.description }).joined(separator: separator)
     }
 }
+
+extension Collection {
+    public var firstTwo: (Element, Element)? {
+        guard self.count >= 2 else {
+            return nil
+        }
+        return (self.first!, self.dropFirst().first!)
+    }
+
+    public var firstThree: (Element, Element, Element)? {
+        guard self.count >= 3 else {
+            return nil
+        }
+        return (self.first!, self.dropFirst().first!, self.dropFirst(2).first!)
+    }
+}

@@ -56,7 +56,7 @@ class Primitives {
             throw Err.arity(procedure: "cdr", expected: 1, given: args.count)
         }
 
-        guard case .cons(car: _ , cdr: let cdr) = args.first! else {
+        guard case .cons(car: _, cdr: let cdr) = args.first! else {
             throw Err.typeError(procedure: "cdr", expected: "Cons Cell", found: args.first!)
         }
 
@@ -107,9 +107,9 @@ class Primitives {
         if args.count == 1 {
             switch args.first! {
             case .double(let dbl):
-                return Value.double(dbl)
+                return Value.double(-dbl)
             case .int(let int):
-                return Value.int(int)
+                return Value.int(-int)
             default:
                 throw Err.mathNonNumber(args.first!)
             }
@@ -259,7 +259,7 @@ class Primitives {
                 }
             case (.int, _),
                  (.double, _):
-                throw Err.mathNonNumber(args[i + 1])
+                throw Err.mathNonNumber(args[args.index(after: i)])
             default:
                 throw Err.mathNonNumber(args[i])
             }
@@ -272,8 +272,7 @@ class Primitives {
             throw Err.arity(procedure: "eq?", expected: 2, given: args.count)
         }
 
-        let lhs = args.first!
-        let rhs = args.dropFirst().first!
+        let (lhs, rhs) = args.firstTwo!
 
         switch (lhs, rhs) {
         case (.symbol(let lstr), .symbol(let rstr)),
@@ -337,16 +336,13 @@ class Primitives {
         guard args.count == 2 else {
             throw Err.arity(procedure: "apply", expected: 2, given: args.count)
         }
-        let proc = args.first!
 
-        switch proc {
-        case .primitive, .procedure:
-            break
-        default:
+        let (proc, argsList) = args.firstTwo!
+
+        guard proc.isProcedure || proc.isPrimitive else {
             throw Err.typeError(procedure: "apply", expected: "procedure or primitive", found: proc)
         }
 
-        let argsList = args.dropFirst().first!
         guard let argsAry = try? argsList.toArray() else {
             throw Err.typeError(procedure: "apply", expected: "a list of arguments",
                                 found: argsList)
@@ -373,7 +369,7 @@ class Primitives {
         var last: Value? = nil
         for arg in args {
             if arg.isList {
-                bigAry.append(contentsOf: try! arg.toArray()) //TODO Should use the bang?
+                bigAry.append(contentsOf: try! arg.toArray())
             } else {
                 guard last == nil else {
                     throw Err.typeError(procedure: "append",
@@ -451,7 +447,7 @@ class Primitives {
                                 found: args.first!)
         }
 
-        try Interpreter.instance.interpret(path: path)
+        try Interpreter.default.interpret(path: path)
         return .void
     }
 

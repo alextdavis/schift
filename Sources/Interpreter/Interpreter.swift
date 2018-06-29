@@ -5,6 +5,7 @@
 import Foundation
 
 public final class Interpreter {
+    public static let instance = Interpreter()
     private let topFrame: Frame
 
     public init() {

@@ -20,21 +20,21 @@ func readLine(_ prompt: String) -> String? {
 }
 
 func repl() throws {
-    let ipr = Interpreter()
+    let ipr = Interpreter.instance
     var tokens = [Value]()
     var lineNo = 0
-    print("Schwift v0.0.1")
+    print("Schift v0.0.1")
     defer {
         print("\nExiting...")
     }
-    while let line = readLine("[\(lineNo)] Schwift> ") {
+    while let line = readLine("[\(lineNo)] Schift> ") {
         defer {
             lineNo += 1
         }
         tokens = try Tokenizer(line).array
 
         while try !Parser.hasMatchingParens(tokens: tokens) {
-            guard let more = readLine("[\(lineNo)]    ... > ") else {
+            guard let more = readLine("[\(lineNo)]   ... > ") else {
                 break
             }
 
@@ -55,7 +55,7 @@ func repl() throws {
 
 func main() throws {
     if CommandLine.arguments.count > 1 {
-        let ipr = Interpreter()
+        let ipr = Interpreter.instance
         do {
             for path in CommandLine.arguments.dropFirst() {
                 print(try ipr.interpret(path: path).outputString)

@@ -446,12 +446,12 @@ class Primitives {
         guard args.count == 1 else {
             throw Err.arity(procedure: "load", expected: 1, given: args.count)
         }
-        guard case .string = args.first! else {
+        guard case .string(let path) = args.first! else {
             throw Err.typeError(procedure: "load", expected: "File path string",
                                 found: args.first!)
         }
 
-        //TODO Interpret from file
+        try Interpreter.instance.interpret(path: path)
         return .void
     }
 

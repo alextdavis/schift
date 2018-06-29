@@ -1,0 +1,54 @@
+;; TESTS WRITTEN BY JED YANG
+
+(define tofu
+  (lambda (x)
+    (set! x 251)))
+
+(define a 23)
+a
+(tofu a)
+a
+
+(define nums (list 1 2 3 4 5))
+
+(define filter
+  (lambda (f lst)
+    (if (null? lst)
+        (list)
+        (if (f (car lst))
+            (cons (car lst)
+                  (filter f (cdr lst)))
+            (filter f (cdr lst))))))
+
+(define filter
+  (lambda (f lst)
+    (cond ((null? lst)
+           (list))
+          ((f (car lst))
+           (cons (car lst)
+                  (filter f (cdr lst))))
+          (else (filter f (cdr lst))))))
+
+(filter zero? nums)
+(filter (lambda (x) (<= x 3)) nums)
+(filter (lambda (x) (* x x)) nums)
+
+(define foldl
+  (lambda (f init lst)
+    (if (null? lst)
+        init
+        (foldl f
+               (f (car lst) init)
+               (cdr lst)))))
+(foldl * 1 (list 1 2 3 4))
+(foldl + 0 (list 3 1 4))
+(foldl cons (list) (list 1 2 3 4)) ;; reverse
+
+(define foldr
+  (lambda (f init lst)
+    (if (null? lst)
+        init
+        (f (car lst)
+           (foldr f init (cdr lst))))))
+(foldr * 1 (list 1 2 3 4))
+(foldr cons (list) (list 1 2 3 4))

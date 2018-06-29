@@ -1,0 +1,11 @@
+;; Range test from the assignment page
+(define range
+  (lambda (n)
+        (if (zero? n)
+            (quote ())
+            (append (range (- n 1)) (list n)))))
+
+(range 0)
+(range 1)
+(range 8)
+(range 99)

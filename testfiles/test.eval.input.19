@@ -1,0 +1,83 @@
+;;; This function, provided by Jed Yang, takes two integers a and b
+;;; and returns all elements from a to b (inclusive) in a lazy list
+(define lazy-range
+  (lambda (a b)
+    (if (<= a b)
+        (cons a  (lambda () (lazy-range (+ a 1) b)))
+        (quote())
+                )))
+
+;;; This function takes an integer first and returns an integer lazy list
+;;; containing the infinite sequence of values first, first+1, ...
+(define lazy-infinite-range
+  (lambda (first)
+    (cons first
+          (lambda () (lazy-infinite-range (+ first 1) )))))
+
+(lazy-infinite-range 4)
+
+;;; This function takes a lazy list llst and an integer n
+;;; and returns an ordinary Scheme list containing the first
+;;; n values in the lazy list.
+(define first-n
+  (lambda (llst n)
+    (cond ((null? llst) llst)
+          ((= 1 n) (list (car llst)))
+        (else (cons (car llst) (first-n ((cdr llst)) (- n 1)))))))
+
+(first-n (lazy-infinite-range 3) 5)
+(first-n (lazy-range 1 3) 5)
+(first-n (quote()) 2)
+(first-n (lazy-infinite-range 3) 5)
+
+;;; This function takes a lazy list llst and an integer n and
+;;; returns the n-th value in the lazy list
+(define nth
+  (lambda (llst n)
+    (cond ((null? llst) #f)
+          ((= 1 n) (list (car llst)))
+        (else (nth ((cdr llst)) (- n 1))))))
+
+(nth (lazy-infinite-range 3) 5)
+
+(nth (lazy-infinite-range 3) 5)
+
+;;; This function takes two lazy lists llst1 and llst2 and
+;;; returns the coordinate-wise sum of the two lists as a lazy list.
+(define lazy-add
+  (lambda (llst1 llst2)
+    (cond ((and (null? llst1) (null? llst2)) (quote(())))
+          ((null? llst1) (append (list (car llst2))
+                                 (lazy-add llst1 ((cdr llst2)))))
+          ((null? llst2) (append (list (car llst1))
+                                 (lazy-add ((cdr llst1)) llst2)))
+          (((cdr llst1))(append (list (+ (car llst1) (car llst2)))
+                                (lazy-add ((cdr llst1)) ((cdr llst2))))))))
+
+(lazy-add (lazy-range 3 10) (lazy-range 5 8))
+
+(lazy-add (lazy-range 3 10) (lazy-range 5 8))
+
+
+;;; This function takes a function predicate and a lazy list llst and
+;;; returns a new lazy list that contains every element elt such that
+;;; (predicate elt) is true.
+(define lazy-filter
+  (lambda (predicate llst)
+    (cond ((null? llst) (quote()))
+      ((predicate (car llst))
+       (cons (car llst)
+             (lambda () (lazy-filter predicate ((cdr llst))))))
+      (else  (lazy-filter predicate ((cdr llst)))))))
+
+(first-n (lazy-filter (lambda (x) (= (modulo x 2) 0)) (lazy-range 1 20)) 10) 
+
+
+(first-n (lazy-filter
+            (lambda (x) (= (modulo x 2) 0))
+            (lazy-range 1 20)) 10)
+
+(first-n (lazy-filter (lambda (x) (= (modulo x 5) 3)) (lazy-range 9 30)) 10)
+
+
+(first-n (lazy-filter (lambda (x) (= (modulo x 5) 3)) (lazy-range 9 30)) 10)

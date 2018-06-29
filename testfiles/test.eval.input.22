@@ -1,0 +1,103 @@
+;;TEST WRITTEN BY JED YANG
+
+(define factorial
+  (lambda (n)
+    (if (zero? n)
+        1
+        (* n (factorial (- n 1))))))
+
+(factorial 4)
+
+;;; Ordinary factorial.
+(define fact
+  (lambda (n)
+    (if (= n 0)
+        1
+        (* n (fact (- n 1))))))
+(fact 10)
+
+;;; Using a helper to use tail calls.
+(define fact-helper
+  (lambda (n so-far)
+    (if (= n 0)
+        so-far
+        (fact-helper (- n 1)
+                     (* n so-far)))))
+(define fact-tail
+  (lambda (n)
+    (fact-helper n 1)))
+(fact-tail 10)
+
+;;; (range i j)
+;;; Returns the list of integers (i, i+1, ..., j)
+(define range
+  (lambda (i j)
+    (if (<= j i)
+        (quote ())
+        (cons i (range (+ i 1) j)))))
+(range 3 10)
+
+;;; (list-ref lst k)
+;;; Returns the k-th element (0-indexed) in lst.
+(define list-ref-1
+  (lambda (lst k)
+    (if (= k 0)
+        (car lst)
+        (list-ref-1 (cdr lst) (- k 1)))))
+(list-ref-1 (range 3 10) 3)
+;(list-ref-1 (range 3 10) 23)
+
+;;; (length lst)
+;;; Returns the number of elements in lst.
+(define length-1
+  (lambda (lst)
+    (if (null? lst)
+        0
+        (+ 1 (length-1 (cdr lst))))))
+
+(define length-tail
+  (lambda (lst)
+    (length-helper lst 0)))
+
+(define length-helper
+  (lambda (lst len)
+    (if (null? lst)
+        len
+        (length-helper (cdr lst)
+                       (+ 1 len)))))
+(length-tail (range 1 10))
+
+;;; (append lst1 lst2)
+;;; Returns the list of lst1 elements followed by lst2 elements.
+(define append-1
+  (lambda (lst1 lst2)
+    (if (null? lst1)
+        lst2
+        (cons (car lst1)
+              (append-1 (cdr lst1)
+                        lst2)))))
+(append-1 (range 3 10) (quote (x y z)))
+
+;;; (reverse lst)
+;;; Returns the list of lst elements in reverse.
+(define reverse-1
+  (lambda (lst)
+    (if (null? lst)
+        (quote ())
+        (append-1 (reverse-1 (cdr lst))
+                  (list (car lst))))))
+(reverse-1 (range 3 10))
+
+(define reverse-helper
+  (lambda (lst result)
+    (if (null? lst)
+        result
+        (reverse-helper (cdr lst)
+                        (cons (car lst) result)))))
+(define reverse-better
+  (lambda (lst)
+    (reverse-helper lst (quote ()))))
+(reverse-better (range 3 10))
+
+;;; Bonus:
+;;; (append lst1 lst2 ... lstn)

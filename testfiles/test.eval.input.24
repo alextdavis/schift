@@ -1,0 +1,93 @@
+;; TESTS MOSTLY WRITTEN BY JED YANG
+
+(let* ((x 1)
+       (f (lambda () x))
+       (g (lambda (x) x))
+       (x (+ x (g 1)))
+       (g (lambda () x)))
+  (list (f) (g)))
+
+;;; let* needs multiple frames.
+(let ((x 1))
+  (let ((f (lambda () x)))
+    (let ((g (lambda (x) x)))
+      (let ((x (+ x (g 1))))
+        (let ((g (lambda () x)))
+          (list (f) (g)))))))
+          
+          
+(define x 1)
+
+(let ((x 2))
+  x)
+
+((lambda (x) x) 3)
+
+((lambda (y) x) 4)
+
+(let ((x (+ x 1)))
+  x)
+  
+"test"
+
+(((lambda (x y)
+    (lambda (y z)
+      (list x y z)))
+  5 6)
+ 7 8)
+
+((((lambda (x y z)
+     (lambda (y u v)
+       (lambda (z v w)
+         (list x y z u v w))))
+   1 2 3)
+  4 5 6)
+ 7 8 9)
+
+(let ((x 23))
+  (let ((x 42)
+        (f (lambda () x)))
+    (list x (f))))
+    
+"Test"
+
+(let ((x 23))
+  (let ((x 42)
+        (f (lambda () x)))
+    (begin
+        (set! x 251)
+        (list x (f)))))
+
+(let ((x 23))
+  (let ((f (lambda () x)))
+    (begin
+        (set! x 251)
+        (list x (f)))))
+
+(let ((x 23))
+  (let ((x 42)
+        (f (lambda ()
+            (begin
+                (set! x 55057)
+                x))))
+    (list x (f) x)))
+
+(let ((x 23))
+  (let ((f (lambda ()
+             (begin
+                (set! x 55057)
+                x))))
+    (list x (f) x)))
+    
+(define z 3)
+(define tofu (let ((z 4))
+            (lambda (x) (+ x z))))
+(let ((z 5))
+  (tofu 10))
+
+
+(letrec ((f (lambda (x)
+              (if (zero? x)
+                  0
+                  (f (- x 1))))))
+  (f 3))

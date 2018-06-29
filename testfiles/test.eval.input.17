@@ -1,0 +1,31 @@
+(define bleh
+  (lambda (num1 num2 num3)
+    (begin
+      (cond
+        ((and num1 num2 #f) "Test 1")
+        ((or) "Test 2")
+        (else "bleh"))
+      (let* ((x 1) (y x)) (- x y)))))
+
+(bleh 1 2 3)
+
+(define something
+  (lambda nums
+    (let ((lst (append nums (quote (4)))))
+      (list lst 5 6))))
+
+(something (list 1 2 3))
+
+(define something-else
+  (lambda (one two)
+    (cond
+      ((pair? one) two)
+      (else "a cons cell is a pair"))))
+
+(something-else 4 9)
+
+(define help
+  (lambda (pred lst)
+    (apply pred lst)))
+
+(help + (list 1 2 3))

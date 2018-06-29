@@ -1,0 +1,13 @@
+;; TEST WRITTEN BY JED YANG
+
+(define not-1
+  (lambda (bool)
+    (if bool #f #t)))
+
+(define tofu
+  (lambda (cond conseq alt)
+    (let ((nconseq (not-1 conseq))
+          (nalt (not-1 alt)))
+      (if cond nconseq nalt))))
+
+(tofu 23 #f #t)

@@ -1,3 +1,5 @@
+.PHONY: build test xcode diffs
+
 build:
 	swift build
 

@@ -5,10 +5,10 @@ import PackageDescription
 let package = Package(
         name: "Kurtscheme",
         products: [
-//            .executable(
-//                    name: "Kurtscheme",
-//                    targets: ["Interpreter", "Tokenize"]
-//            ),
+            .executable(
+                    name: "Schift",
+                    targets: ["Schift"]
+            ),
             .executable(
                     name: "Tokenize",
                     targets: ["Tokenize"]
@@ -42,16 +42,20 @@ let package = Package(
                     dependencies: ["Interpreter"]
             ),
             .target(
-                name: "Parse",
-                dependencies: ["Interpreter"]
+                    name: "Parse",
+                    dependencies: ["Interpreter"]
             ),
             .testTarget(
-                name: "ParserTests",
-                dependencies: ["Interpreter"]
+                    name: "ParserTests",
+                    dependencies: ["Interpreter"]
             ),
             .target(
-                name: "REPL",
-                dependencies: ["Interpreter"]
+                    name: "REPL",
+                    dependencies: ["Interpreter"]
+            ),
+            .target(
+                    name: "Schift",
+                    dependencies: ["Interpreter"]
             ),
             .testTarget(
                     name: "EvaluatorTests",

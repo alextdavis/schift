@@ -26,14 +26,14 @@ public final class Frame {
         self.bind(sym, value: value)
     }
 
-    public func bind(symbol: Value, primitive: @escaping (Value) throws -> Value) throws {
+    public func bind(symbol: Value, primitive: @escaping ([Value]) throws -> Value) throws {
         guard case .symbol(let sym) = symbol else {
             throw Err.bindToNonSymbol(symbol)
         }
         self.bind(sym, primitive: primitive);
     }
 
-    public func bind(_ str: String, primitive: @escaping (Value) throws -> Value) {
+    public func bind(_ str: String, primitive: @escaping ([Value]) throws -> Value) {
         self.bind(str, value: Value.primitive(primitive))
     }
 

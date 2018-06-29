@@ -8,6 +8,9 @@
 
 import Foundation
 
+//TODO IDEA: Make class which is a view into an immutable Value which it tests at runtime to be a
+// proper list. Then have it implement protocols.
+
 public enum Value {
     case null
     case void
@@ -20,7 +23,7 @@ public enum Value {
     case symbol(String)
     indirect case cons(car: Value, cdr: Value)
     indirect case procedure(formals: Value, body: Value, frame: Frame)
-    case primitive((Value) throws -> Value)
+    case primitive(([Value]) throws -> Value)
 }
 
 extension Value {

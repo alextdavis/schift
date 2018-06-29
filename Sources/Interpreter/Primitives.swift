@@ -18,52 +18,47 @@ class Primitives {
         frame.bind("/", primitive: divide)
     }
 
-    private static func isNull(_ args: Value) throws -> Value {
-        precondition(args.isList, "Primitive found non-list args.")
-        guard try! args.length() == 1 else {
-            throw Err.arity(procedure: "null?", expected: 1, given: try? args.length())
+    private static func isNull(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "null?", expected: 1, given: args.count)
         }
 
-        return Value.bool(try args.car().isNull)
+        return Value.bool(args.first!.isNull)
     }
 
-    private static func car(_ args: Value) throws -> Value {
-        precondition(args.isList, "Primitive found non-list args.")
-        guard try! args.length() == 1 else {
-            throw Err.arity(procedure: "car", expected: 1, given: try? args.length())
+    private static func car(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "car", expected: 1, given: args.count)
         }
 
-        guard case .cons(car:let car, cdr:_) = try! args.car() else {
-            throw Err.typeError(procedure: "car", expected: "Cons Cell", found: try! args.car())
+        guard case .cons(car: let car, cdr: _) = args.first! else {
+            throw Err.typeError(procedure: "car", expected: "Cons Cell", found: args.first!)
         }
 
         return car
     }
 
-    private static func cdr(_ args: Value) throws -> Value {
-        precondition(args.isList, "Primitive found non-list args.")
-        guard try! args.length() == 1 else {
-            throw Err.arity(procedure: "cdr", expected: 1, given: try? args.length())
+    private static func cdr(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "cdr", expected: 1, given: args.count)
         }
 
-        guard case .cons(car:_, cdr:let cdr) = try! args.car() else {
-            throw Err.typeError(procedure: "cdr", expected: "Cons Cell", found: try! args.car())
+        guard case .cons(car: _ , cdr: let cdr) = args.first! else {
+            throw Err.typeError(procedure: "cdr", expected: "Cons Cell", found: args.first!)
         }
 
         return cdr
     }
 
-    private static func cons(_ args: Value) throws -> Value {
-        precondition(args.isList, "Primitive found non-list args.")
-        guard try! args.length() == 2 else {
-            throw Err.arity(procedure: "cons", expected: 2, given: try! args.length())
+    private static func cons(_ args: [Value]) throws -> Value {
+        guard args.count == 2 else {
+            throw Err.arity(procedure: "cons", expected: 2, given: args.count)
         }
 
-        return try! Value.cons(car: args.car(), cdr:args.cdr().car())
+        return Value.cons(car: args.first!, cdr: args.dropFirst().first!)
     }
 
-    private static func add(_ args: Value) throws -> Value {
-        precondition(args.isList, "Primitive found non-list args.")
+    private static func add(_ args: [Value]) throws -> Value {
         var sumInt    = 0
         var sumDouble = 0.0
         var isDouble  = false
@@ -91,21 +86,19 @@ class Primitives {
         }
     }
 
-    private static func subtract(_ args: Value) throws -> Value {
-        guard try args.length() > 0 else {
-            throw Err.arity(procedure: "-", expected: 1..., given: try args.length())
+    private static func subtract(_ args: [Value]) throws -> Value {
+        guard args.count > 0 else {
+            throw Err.arity(procedure: "-", expected: 1..., given: args.count)
         }
 
-        let first = try args.car()
-
-        if try args.length() == 1 {
-            switch first {
+        if args.count == 1 {
+            switch args.first! {
             case .double(let dbl):
                 return Value.double(dbl)
             case .int(let int):
                 return Value.int(int)
             default:
-                throw Err.mathNonNumber(first)
+                throw Err.mathNonNumber(args.first!)
             }
         }
 
@@ -113,7 +106,7 @@ class Primitives {
         var diffDouble = 0.0
         var isDouble: Bool
 
-        switch first {
+        switch args.first! {
         case .double(let dbl):
             diffDouble = dbl
             isDouble = true
@@ -121,10 +114,10 @@ class Primitives {
             diffInt = int
             isDouble = false
         default:
-            throw Err.mathNonNumber(first)
+            throw Err.mathNonNumber(args.first!)
         }
 
-        for arg in try args.cdr() {
+        for arg in args.dropFirst() {
             switch arg {
             case .int(let int) where !isDouble:
                 diffInt -= int
@@ -147,7 +140,7 @@ class Primitives {
         }
     }
 
-    private static func multiply(_ args: Value) throws -> Value {
+    private static func multiply(_ args: [Value]) throws -> Value {
         var prodInt    = 1
         var prodDouble = 1.0
         var isDouble   = false
@@ -175,13 +168,13 @@ class Primitives {
         }
     }
 
-    private static func divide(_ args: Value) throws -> Value {
-        guard try args.length() > 0 else {
-            throw Err.arity(procedure: "-", expected: 1..., given: try args.length())
+    private static func divide(_ args: [Value]) throws -> Value {
+        guard args.count > 0 else {
+            throw Err.arity(procedure: "-", expected: 1..., given: args.count)
         }
 
-        if try args.length() == 1 {
-            switch try args.car() {
+        if args.count == 1 {
+            switch args.first! {
             case .double(let dbl):
                 if dbl == 0 {
                     throw Err.divideByZero
@@ -193,12 +186,12 @@ class Primitives {
                 }
                 return .double(1.0 / Double(int))
             default:
-                throw Err.mathNonNumber(try args.car())
+                throw Err.mathNonNumber(args.first!)
             }
         }
 
-        let numerValue = try args.car()
-        let denomValue = try multiply(args.cdr())
+        let numerValue = args.first!
+        let denomValue = try multiply(Array(args.dropFirst()))
 
         if case .int(let int) = denomValue, int == 0 {
             throw Err.divideByZero
@@ -228,15 +221,13 @@ class Primitives {
         }
     }
 
-    private static func leq(_ args: Value) throws -> Value {
-        guard try args.length() >= 2 else {
-            throw Err.arity(procedure: "<=", expected: 2..., given: try args.length())
+    private static func leq(_ args: [Value]) throws -> Value {
+        guard args.count >= 2 else {
+            throw Err.arity(procedure: "<=", expected: 2..., given: args.count)
         }
 
-        let nums = try args.toArray()
-        for i in nums.startIndex..<nums.endIndex - 1 {
-
-            switch (nums[i], nums[i + 1]) {
+        for i in args.startIndex..<args.index(before: args.endIndex) {
+            switch (args[i], args[i + 1]) {
             case (.int(let lint), .int(let rint)):
                 guard lint <= rint else {
                     return .bool(false)
@@ -255,21 +246,21 @@ class Primitives {
                 }
             case (.int, _),
                  (.double, _):
-                throw Err.mathNonNumber(nums[i + 1])
+                throw Err.mathNonNumber(args[i + 1])
             default:
-                throw Err.mathNonNumber(nums[i])
+                throw Err.mathNonNumber(args[i])
             }
         }
         return .bool(true)
     }
 
-    private static func isEq(_ args: Value) throws -> Value {
-        guard try args.length() == 2 else {
-            throw Err.arity(procedure: "eq?", expected: 2, given: try args.length())
+    private static func isEq(_ args: [Value]) throws -> Value {
+        guard args.count == 2 else {
+            throw Err.arity(procedure: "eq?", expected: 2, given: args.count)
         }
 
-        let lhs = try args.car()
-        let rhs = try args.cdr().car()
+        let lhs = args.first!
+        let rhs = args.dropFirst().first!
 
         switch (lhs, rhs) {
         case (.symbol(let lstr), .symbol(let rstr)),
@@ -295,15 +286,14 @@ class Primitives {
         }
     }
 
-    private static func equalsSign(_ args: Value) throws -> Value {
-        guard try args.length() >= 2 else {
-            throw Err.arity(procedure: "=", expected: 2..., given: try args.length())
+    private static func equalsSign(_ args: [Value]) throws -> Value {
+        guard args.count >= 2 else {
+            throw Err.arity(procedure: "=", expected: 2..., given: args.count)
         }
 
-        let nums = try args.toArray()
-        for i in nums.startIndex..<nums.endIndex - 1 {
+        for i in args.startIndex..<args.index(before: args.endIndex) {
 
-            switch (nums[i], nums[i + 1]) {
+            switch (args[i], args[i + 1]) {
             case (.int(let lint), .int(let rint)):
                 guard lint == rint else {
                     return .bool(false)
@@ -322,18 +312,19 @@ class Primitives {
                 }
             case (.int, _),
                  (.double, _):
-                throw Err.mathNonNumber(nums[i + 1])
+                throw Err.mathNonNumber(args[i + 1])
             default:
-                throw Err.mathNonNumber(nums[i])
+                throw Err.mathNonNumber(args[i])
             }
         }
+        return .bool(true)
     }
 
-    private static func apply(_ args: Value) throws -> Value {
-        guard try args.length() == 2 else {
-            throw Err.arity(procedure: "apply", expected: 2, given: try args.length())
+    private static func apply(_ args: [Value]) throws -> Value {
+        guard args.count == 2 else {
+            throw Err.arity(procedure: "apply", expected: 2, given: args.count)
         }
-        let proc = try args.car()
+        let proc = args.first!
 
         switch proc {
         case .primitive, .procedure:
@@ -342,7 +333,7 @@ class Primitives {
             break
         }
 
-        let argsList = try args.cdr().car()
+        let argsList = args.dropFirst().first!
         guard argsList.isList else {
             throw Err.typeError(procedure: "apply", expected: "a list of arguments",
                                 found: argsList)
@@ -351,12 +342,12 @@ class Primitives {
         return .void //TODO Implement apply.
     }
 
-    private static func pair(_ args: Value) throws -> Value {
-        guard try args.length() == 1 else {
-            throw Err.arity(procedure: "pair?", expected: 1, given: try args.length())
+    private static func pair(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "pair?", expected: 1, given: args.count)
         }
 
-        switch try args.car() {
+        switch args.first! {
         case .cons:
             return .bool(true)
         default:
@@ -364,7 +355,7 @@ class Primitives {
         }
     }
 
-    private static func append(_ args: Value) throws -> Value {
+    private static func append(_ args: [Value]) throws -> Value {
         var bigAry       = [Value]()
         var last: Value? = nil
         for arg in args {
@@ -387,27 +378,27 @@ class Primitives {
         }
     }
 
-    private static func primitiveFloor(_ args: Value) throws -> Value {
-        guard try args.length() == 1 else {
-            throw Err.arity(procedure: "floor", expected: 1, given: try args.length())
+    private static func primitiveFloor(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "floor", expected: 1, given: args.count)
         }
 
-        switch try args.car() {
+        switch args.first! {
         case .double(let dbl):
             return .int(Int(floor(dbl)))
         case .int(let int):
             return .int(int)
         default:
-            throw Err.mathNonNumber(try args.car())
+            throw Err.mathNonNumber(args.first!)
         }
     }
 
-    private static func isInteger(_ args: Value) throws -> Value {
-        guard try args.length() == 1 else {
-            throw Err.arity(procedure: "integer?", expected: 1, given: try args.length())
+    private static func isInteger(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "integer?", expected: 1, given: args.count)
         }
 
-        switch try args.car() {
+        switch args.first! {
         case .double(let dbl):
             return .bool(floor(dbl) == dbl)
         case .int:
@@ -417,12 +408,12 @@ class Primitives {
         }
     }
 
-    private static func isDouble(_ args: Value) throws -> Value {
-        guard try args.length() == 1 else {
-            throw Err.arity(procedure: "double?", expected: 1, given: try args.length())
+    private static func isDouble(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "double?", expected: 1, given: args.count)
         }
 
-        switch try args.car() {
+        switch args.first! {
         case .double:
             return .bool(true)
         default:
@@ -430,47 +421,47 @@ class Primitives {
         }
     }
 
-    private static func isList(_ args: Value) throws -> Value {
-        guard try args.length() == 1 else {
-            throw Err.arity(procedure: "list?", expected: 1, given: try args.length())
+    private static func isList(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "list?", expected: 1, given: args.count)
         }
 
-        return .bool(try args.car().isList)
+        return .bool(args.first!.isList)
     }
 
-    private static func load(_ args: Value) throws -> Value {
-        guard try args.length() == 1 else {
-            throw Err.arity(procedure: "load", expected: 1, given: try args.length())
+    private static func load(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "load", expected: 1, given: args.count)
         }
-        guard case .string = try args.car() else {
+        guard case .string = args.first! else {
             throw Err.typeError(procedure: "load", expected: "File path string",
-                                found: try args.car())
+                                found: args.first!)
         }
 
         //TODO Interpret from file
         return .void
     }
 
-    private static func reverse(_ args: Value) throws -> Value {
-        guard try args.length() == 1 else {
-            throw Err.arity(procedure: "reverse", expected: 1, given: try args.length())
+    private static func reverse(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "reverse", expected: 1, given: args.count)
         }
-        guard try args.car().isList else {
+        guard args.first!.isList else {
             throw Err.typeError(procedure: "reverse", expected: "Proper list",
-                                found: try args.car())
+                                found: args.first!)
         }
 
-        return try args.car().reversed()
+        return try args.first!.reversed()
     }
 
-    private static func length(_ args: Value) throws -> Value {
-        guard try args.length() == 1 else {
-            throw Err.arity(procedure: "length", expected: 1, given: try args.length())
+    private static func length(_ args: [Value]) throws -> Value {
+        guard args.count == 1 else {
+            throw Err.arity(procedure: "length", expected: 1, given: args.count)
         }
-        guard try args.car().isList else {
-            throw Err.typeError(procedure: "length", expected: "Proper list", found: try args.car())
+        guard args.first!.isList else {
+            throw Err.typeError(procedure: "length", expected: "Proper list", found: args.first!)
         }
 
-        return try .int(args.car().length())
+        return try .int(args.first!.length())
     }
 }

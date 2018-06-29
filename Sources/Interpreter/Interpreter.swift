@@ -21,6 +21,10 @@ public final class Interpreter {
         return try vals.reversed()
     }
 
+    public func interpret(tokens: [Value]) throws -> Value {
+        return try self.interpret(Parser.parse(tokens))
+    }
+
     public func interpret(source: String) throws -> Value {
         return try self.interpret(Parser.parse(Tokenizer(source).array))
     }

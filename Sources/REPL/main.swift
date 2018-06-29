@@ -11,7 +11,7 @@ while let line = readLine(strippingNewline: false) {
     }
     do {
         try tokens += Tokenizer(line).array
-        let vals = try interpreter.interpret(Parser.parse(Tokenizer(line).array))
+        let vals = try interpreter.interpret(source: line)
         for val in vals {
             print(val)
         }

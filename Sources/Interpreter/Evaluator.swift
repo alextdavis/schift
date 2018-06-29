@@ -117,7 +117,9 @@ public final class Evaluator {
     }
 
     private static func evalCond(_ args: Value, _ frame: Frame) throws -> Value {
-        for arg in args {
+        let ary = try args.toArray()
+        for i in ary.indices {
+            let arg = ary[i]
             guard arg.isList, try arg.length() == 2 else {
                 throw Err.specialForm("Each argument to `cond` must be a proper list of length 2.")
             }
@@ -125,7 +127,20 @@ public final class Evaluator {
             let test = try arg.car()
             let conseq = try arg.cdr().car()
 
-            //TODO FINISH
+            if case .symbol(let str) = test, str == "else" {
+                if i != ary.index(before: ary.endIndex) {
+                    throw Err.specialForm("`else` must be the last condition in `cond`.")
+                } else {
+                    return try eval(conseq, frame: frame)
+                }
+            }
+
+            let testResult = try eval(test, frame: frame)
+            if case .bool(false) = testResult {
+                continue
+            } else {
+                return try eval(conseq, frame: frame)
+            }
         }
 
         return Value.void
@@ -160,7 +175,7 @@ public final class Evaluator {
 
     private static func apply(_ proc: Value, args: Value) throws -> Value {
         if case .primitive(let closure) = proc {
-            return try closure(args)
+            return try closure(args.toArray())
         }
 
         guard case .procedure(formals:let formals,
@@ -175,8 +190,8 @@ public final class Evaluator {
         let newFrame = Frame(parent: parentFrame)
 
         if formals.isList {
-            guard try formals.length() == args.length() else {
-                throw Err.arity(procedure: "#<procedure>", //TODO: Include primtive name?
+            guard try! formals.length() == args.length() else {
+                throw Err.arity(procedure: "#<procedure>", //TODO: Include primitive name?
                                 expected: try! formals.length(),
                                 given: try? args.length())
             }

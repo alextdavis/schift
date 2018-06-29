@@ -54,7 +54,7 @@ public final class Parser {
         }
     }
 
-    public static func hasMatchingParens(tokens: Value) throws -> Bool {
+    public static func hasMatchingParens(tokens: [Value]) throws -> Bool {
         var count = 0
         for token in tokens {
             switch token {

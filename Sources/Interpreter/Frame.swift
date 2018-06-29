@@ -60,14 +60,15 @@ public final class Frame {
         throw Err.unboundVariable(symbol)
     }
 
-    public static func setBang(_ str: String, value: Value, env frame: Frame) throws -> Bool {
-        var curFrame: Frame? = frame
-        while curFrame != nil {
-            if frame.bindings[str] != nil {
-                frame.bindings[str] = value
+    public static func setBang(_ str: String, value: Value,
+                               env startingFrame: Frame) throws -> Bool {
+        var frame: Frame? = startingFrame
+        while frame != nil {
+            if frame!.bindings[str] != nil {
+                frame!.bindings[str] = value
                 return true
             }
-            curFrame = curFrame?.parent
+            frame = frame?.parent
         }
         return false
     }

@@ -341,9 +341,9 @@ class Primitives {
 
         switch proc {
         case .primitive, .procedure:
-            throw Err.typeError(procedure: "apply", expected: "procedure", found: proc)
-        default:
             break
+        default:
+            throw Err.typeError(procedure: "apply", expected: "procedure or primitive", found: proc)
         }
 
         let argsList = args.dropFirst().first!

@@ -4,6 +4,8 @@
 
 import Foundation
 
+fileprivate let LibraryPath = "./Library/"
+
 public final class Interpreter {
     public static let instance = Interpreter()
     private let topFrame: Frame
@@ -11,6 +13,12 @@ public final class Interpreter {
     public init() {
         topFrame = Frame(parent: nil)
         Primitives.bindPrimitives(frame: topFrame)
+        for filename in try! FileManager.default.contentsOfDirectory(atPath: LibraryPath) {
+            if filename.hasSuffix(".scm"),
+               FileManager.default.isReadableFile(atPath: LibraryPath + filename) {
+                try! self.interpret(path: LibraryPath + filename)
+            }
+        }
     }
 
     private func interpret(_ exprs: Value) throws -> Value {

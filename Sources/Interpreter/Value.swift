@@ -184,6 +184,19 @@ extension Value: CustomStringConvertible {
             return "Primitive"
         }
     }
+
+    public var outputString: String {
+        precondition(self.isList, "Cannot print a non-list in the output format")
+        let ary = try! self.toArray()
+        return ary.filter({
+            switch $0 {
+            case .void:
+                return false
+            default:
+                return true
+            }
+        }).joinedStrings(separator: "\n")
+    }
 }
 
 //extension Value {

@@ -47,7 +47,7 @@ public final class Evaluator {
             let x = try binding.car()
             let e = try binding.cdr().car()
 
-            guard try parentFrame.lookupInSingleFrame(symbol: x) == nil else {
+            guard try frame.lookupInSingleFrame(symbol: x) == nil else {
                 throw Err.specialForm("Duplicate identifier in `let`: `\(x)`")
             }
 

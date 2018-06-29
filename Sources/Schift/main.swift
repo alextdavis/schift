@@ -41,7 +41,7 @@ func repl() throws {
             tokens += try Tokenizer(more).array
         }
         do {
-            print(try ipr.interpret(tokens: tokens))
+            print(try ipr.interpret(tokens: tokens).outputString)
         } catch {
             if let kurtErr = error as? KurtError {
                 print(kurtErr.message)
@@ -56,8 +56,17 @@ func repl() throws {
 func main() throws {
     if CommandLine.arguments.count > 1 {
         let ipr = Interpreter()
-        for path in CommandLine.arguments {
-            print(try ipr.interpret(path: path))
+        do {
+            for path in CommandLine.arguments.dropFirst() {
+                print(try ipr.interpret(path: path).outputString)
+            }
+        } catch {
+            if let kurtErr = error as? KurtError {
+                print(kurtErr.message)
+            } else {
+                print("Problematic error:")
+                print(error)
+            }
         }
         exit(0)
     }

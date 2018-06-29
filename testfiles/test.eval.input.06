@@ -1,11 +1,76 @@
-(define not
-  (lambda (bool)
-    (if bool #f #t)))
+;;Homework 5
+;;4/11/18
+;;Discussed ideas with Chris Tordi and Alex Davis
 
-(define tofu
-  (lambda (cond conseq alt)
-    (let ((nconseq (not conseq))
-          (nalt (not alt)))
-      (if cond nconseq nalt))))
+;;Helper methods made in hw3
 
-(tofu 23 #f #t)
+(define lazy-infinite-range
+ (lambda (first)
+   (cons first
+         (lambda () (lazy-infinite-range (+ 1 first))))))
+
+(define first-n
+  (lambda (llst n)
+    (if (or (< n 1) (null? llst))
+        '()
+        (cons (car llst)
+              (first-n ((cdr llst)) (- n 1))))))
+
+(define nth
+  (lambda (llst n)
+    (if (< (length (first-n llst n)) n)
+        #f
+        (car (reverse (first-n llst n))))))
+
+(define lazy-filter
+  (lambda (predicate llst)
+    (cond
+      ((null? llst) '())
+      ((predicate (car llst))
+       (cons
+        (car llst)
+        (lambda () (lazy-filter predicate ((cdr llst))))))
+      (else ((lambda () (lazy-filter predicate ((cdr llst)))))))))
+
+;;End of hw3 methods
+
+;;Takes two numbers and returns true if d evenly divides n
+(define not-divisible?
+  (lambda (d n)
+    (if (equal? (modulo n d) 0)
+        #f
+        #t)))
+
+;;A curried method that calls not-divisible? that is used by lazy filter
+(define not-divisible-by
+  (lambda (d)
+    (lambda (n)
+      (not-divisible? d n))))
+
+;;Removes the head of llst and returns the cdr of llst as a lazy list
+(define sieve
+  (lambda (llst)
+    (cons (car ((cdr llst)))
+          (cdr llst))))
+
+;;Makes a lazy list by combining the first element of a lazy list with a
+;;procedure that recursively calls primes-helper on lazy lists without
+;;numbers divisible by the first element of the passed in lazy list and without
+;;the first element itself.
+(define primes-helper
+  (lambda (llst)
+    (cons (car llst)
+          (lambda () (primes-helper
+           (lazy-filter
+            (not-divisible-by (car llst))
+            (sieve llst)))))))
+
+;;Calls primes-helper, passing in a lazy-infinite-range llst starting at 2
+(define primes
+  (lambda ()
+    (primes-helper (lazy-infinite-range 2))))
+
+;;Test cases for primes
+(first-n (primes) 19)
+(nth (primes) 20)
+(nth (primes) 123)

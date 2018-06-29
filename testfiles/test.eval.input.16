@@ -1,26 +1,207 @@
-(define length
+;;homework 2, 4/02
+
+;(#%require rackunit)
+
+;;returns a empty list
+(define null-binary-tree list)
+
+;;returns true if entry is a null binary tree, otherwise returns false
+(define null-binary-tree?
+  (lambda (node)
+    (equal? '() node)))
+
+;;returns true if the entry is valid
+(define valid-entry?
+  (lambda (node)
+    (if (or (null-binary-tree? node) (not (equal? (length node) 3)))
+        #f
+        #t)))
+
+;;returns value of the node
+(define entry
+  (lambda (node)
+    (if (valid-entry? node)
+        (car node)
+        "not a valid entry")))
+
+;;returns the left subtree
+(define left
+  (lambda (node)
+    (if (valid-entry? node)
+        (car (cdr node))
+        "not a valid entry")))
+
+;;returns the right subtree
+(define right
+  (lambda (node)
+    (if (valid-entry? node)
+        (car (cdr (cdr node)))
+        "not a valid entry")))
+
+
+;;test cases for entry, left, right and null-binary-tree?
+(null-binary-tree)
+(entry '(5 () ()))
+(entry '(() () ()))
+(left '(5 (4 () ()) ()))
+(right '(5 (4 () ()) (3 () (2 () ()))))
+(null-binary-tree? '())
+(null-binary-tree? '(5))
+
+;;makes a binary tree out of a value, left subtree, and right subtree
+(define make-binary-tree
+  (lambda (element left-subtree right-subtree)
+    (list element left-subtree right-subtree)))
+
+;;returns true if the input is a valid binary tree, otherwise returns false
+(define binary-tree?
+  (lambda (node)
+    (cond
+      ((null-binary-tree? node) #t)
+      ((and (equal? (length node) 3)
+            (integer? (entry node))
+            (binary-tree? (left node))
+            (binary-tree? (right node))) #t)
+      (else #f))))
+
+;;test cases for binary-tree? and make-binary-tree procedures
+(binary-tree? (make-binary-tree 5 '(3 () (4 () ())) '(6 ()())))
+(binary-tree? (make-binary-tree 5 '(3 () (4 () ())) '(6 ()()())))
+
+;;visits the bst in a preorder traversal, returning the list of values
+(define preorder
+  (lambda (bst)
+    (if (binary-tree? bst)
+        (preorder-helper bst)
+        "input is not a binary tree")))
+
+;;called by preorder, makes the list of values that is returned to preorder
+(define preorder-helper
+  (lambda (bst)
+    (if (null-binary-tree? bst)
+        '()
+        (append
+         (append
+          (list (entry bst))
+          (preorder-helper (left bst)))
+         (preorder-helper (right bst))))))
+
+;;visits the bst in a inorder traversal, returning the list of values
+(define inorder
+  (lambda (bst)
+    (if (binary-tree? bst)
+        (inorder-helper bst)
+        "input is not a binary tree")))
+
+;;called by inorder, makes the list of values that is returned to inorder
+(define inorder-helper
+  (lambda (bst)
+    (if (null-binary-tree? bst)
+        '()
+        (append
+         (append
+          (inorder-helper (left bst))
+          (list (entry bst)))
+         (inorder-helper (right bst))))))
+
+;;visits the bst in a postorder traversal, returning the list of values
+(define postorder
+  (lambda (bst)
+    (if (binary-tree? bst)
+        (postorder-helper bst)
+        "input is not a binary tree")))
+
+;;called by postorder, makes the list of values that is returned to postorder
+(define postorder-helper
+  (lambda (bst)
+    (if (null-binary-tree? bst)
+        '()
+        (append
+         (append
+          (postorder-helper (left bst))
+          (postorder-helper (right bst)))
+         (list (entry bst))))))
+
+;;test cases for the three traversal procedures
+(preorder '(5 (4 () ()) (9 (6 () ()) (11 () ()))))
+(preorder '(5 (4 () () ()) (9 (6 () ()) (11 () ()))))
+
+(inorder '(5 (4 () ()) (9 (6 () ()) (11 () ()))))
+
+(inorder '(5 (4 () () ()) (9 (6 () ()) (11 () ()))))
+
+(postorder '(5 (4 () ()) (9 (6 () ()) (11 () ()))))
+
+(postorder '(5 (4 () () ()) (9 (6 () ()) (11 () ()))))
+
+;;returns true if the input is a valid binary search tree,
+;;otherwise returns false
+(define bst?
+  (lambda (node)
+    (if (binary-tree? node)
+        (ordered-list?(inorder node))
+        #f)))
+
+;;called by bst, returns true if the input is an ordered list from smallest
+;;to largest, otherwise returns false
+(define ordered-list?
   (lambda (lst)
-    (if (null? lst)
-        0
-        (+ 1 (length (cdr lst))))))
+    (cond ((or(equal? lst '()) (equal?(cdr lst) '()))  #t)
+          ((and (< (car lst) (car (cdr lst)))
+           (ordered-list? (cdr lst))) #t)
+          (else #f))))
 
-(length (quote ()))
-(length (quote (4 5 6)))
+;;test cases for bst? and ordered-list? procedures
+(bst? '(5 (4 () ()) (9 (6 () ()) (11 () ()))))
+(bst? '())
+(bst? '(5 (4 () ()) (9 (3 () ()) (11 () ()))))
 
-(define append
-  (lambda (lst1 lst2)
-    (if (null? lst1)
-        lst2
-        (cons (car lst1) (append (cdr lst1) lst2)))))
+;;returns true if the input value is contained in the bst. If the tree is not a
+;;bst or the input is not contained in the tree, then reports an invalid entry
+(define member?
+  (lambda (v bst)
+    (if (and (bst? bst) (integer? v))
+        (member-helper v bst)
+        "your entry was invalid")))
 
-(append (quote (4 5)) (quote (6 7)))
+;;called by member?, returns true if the value is in the bst
+;;otherwise returns false
+(define member-helper
+  (lambda (v bst)
+    (cond
+      ((null-binary-tree? bst) #f)
+      ((eq? v (entry bst)) #t)
+      ((> (entry bst) v) (member? v (left bst)))
+      ((< (entry bst) v) (member? v (right bst))))))
 
-(define reverse
-  (lambda (lst)
-    (if (null? lst)
-        lst
-        (append (reverse (cdr lst)) (cons (car lst) (quote ()))))))
+;;test cases for member? procedure
+(member? 6 '(5 (3 () (4 () ())) ()))
+(member? 4 '(5 (3 () (4 () ())) ()))
+(member? "r" '(5 (3 () (4 () ())) ()))
 
-(reverse (quote ()))
-(reverse (quote (1 2 3 4)))
-(reverse (quote (("computer" "science") "is" "awesome")))
+;;Inserts value into bst and returns copy of bst with inserted value.
+;;If there is an invalid entry, notifies the user
+(define insert
+  (lambda (v bst)
+    (if (and (bst? bst) (integer? v))
+    (insert-helper v bst)
+    "your entry was invalid")))
+
+;;called by insert, adds value in correct place and constructs new bst.
+;;If there is a duplicate value, returns a copy of the bst
+(define insert-helper
+  (lambda (v bst)
+    (cond
+      ((null-binary-tree? bst) (make-binary-tree v '() '()))
+      ((equal? v (entry bst))
+       (make-binary-tree (entry bst) (left bst) (right bst)))
+      ((< v (entry bst))
+       (make-binary-tree (entry bst) (insert v (left bst)) (right bst)))
+      ((> v (entry bst))
+       (make-binary-tree (entry bst) (left bst) (insert v (right bst)))))))
+
+;;test cases for insert and insert-helper procedures
+(insert 5 '(3 () ()))
+(insert 3 '(3 () (6 () ())))
+(insert  7 '())
+(insert  "i" '(3 () ()))

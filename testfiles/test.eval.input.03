@@ -10,18 +10,60 @@ blah
 
 ;Question 2
 ;This function takes in an integer (n) and a list (lst) and returns the first n elements of lst
-(define keep-first-n
+(define keep-first-n-1
   (lambda (n lst)
     (if #f
       n
       (let ((n 10)) n))))
       
-(keep-first-n 11 "abc")
+(keep-first-n-1 11 "abc")
 
-(define test (lambda () (keep-first-n 12 13)))
+(define test (lambda () (keep-first-n-1 12 13)))
 
 (test)
 
 (define weird (lambda (x y z) (if x z y)))
 
 (weird 23 24 25)
+
+;Eva Grench
+;3/30/18
+;hw1
+
+;Question 1
+;These three lines of code each get the symbol 'mary from the given list
+(car (cdr (cdr '(jane elizabeth mary kitty lydia))))
+(car (car (cdr (cdr (car '(((jane) (elizabeth) (mary) (kitty) (lydia))))))))
+(car (car (car (cdr (cdr '(jane (elizabeth) ((mary)) (((kitty))) ((((lydia))))))))))
+
+;Question 2
+;This function takes in an integer (n) and a list (lst) and returns the first n elements of lst
+(define keep-first-n
+  (lambda (n lst)
+    (cond
+      ;The list is returned when it has the number of items specified
+      ;The entire list is returned if the number of items desired is bigger than the list
+      ((<= (length lst) n) lst)
+      ;An empty list is returned if the user inputs a negative number.
+      ((< n 0) '())
+      ;The recursive call takes in a list that does not have the last item
+      (else (keep-first-n n (reverse (cdr (reverse lst))))))))
+
+;Quetion 3
+;This function takes in a list of numbers (lst) and returns the sum of all of the numbers in lst
+(define sum
+  (lambda (lst)
+    (cond
+      ;The sum is returned once all of the numbers have been added together
+      ((= (length lst) 1) (car lst))
+      ;Return 0 if an empty list was inputted
+      ((< (length lst) 1) 0)
+      ;The recursive call takes in a list that is always one item shorter than the previous list
+      ;and first entry is now a sum of the first two entries
+      (else (sum (cons (+ (car lst) (car (cdr lst))) (cdr (cdr lst))))))))
+
+(sum '(1 2 3 4))
+
+(sum '(-1 -2 3 4))
+
+(keep-first-n 2 '(1 2 3 4 5 6))

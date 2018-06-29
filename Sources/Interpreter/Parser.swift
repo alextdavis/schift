@@ -10,7 +10,7 @@ public final class Parser {
         switch token {
         case .open:
             depth += 1
-            tree = Value.cons(car: token, cdr: tree)
+            tree = .cons(car: token, cdr: tree)
 
         case .close:
             depth -= 1
@@ -23,34 +23,33 @@ public final class Parser {
                 if case .open = try tree.car() {
                     break
                 }
-                subTree = Value.cons(car: try tree.car(), cdr: subTree)
+                subTree = .cons(car: try tree.car(), cdr: subTree)
 
-                tree = try tree.cdr()
+                tree = try! tree.cdr()
             }
 
-            tree = try tree.cdr()
+            tree = try! tree.cdr()
 
-//            // Implements lil' buddy. TODO Fix this
-//            let treeCar: Value = try tree.car() // Don't know why this line is necessary
-//            if case .cons = tree, case .quote = treeCar {
-//                tree = try tree.cdr()
-//                subTree = Value.cons(car: .symbol("quote"),
-//                                     cdr: .cons(car: subTree,
-//                                                cdr: .null))
-//            }
+            // Implements lil' buddy. TODO Fix this
+            if tree.isCons, try! tree.car().isQuote {
+                tree = try tree.cdr()
+                subTree = .cons(car: .symbol("quote"),
+                                cdr: .cons(car: subTree,
+                                           cdr: .null))
+            }
 
-            tree = Value.cons(car: subTree, cdr: tree)
+            tree.prepend(subTree)
 
         default:
-//            if case .cons = tree, case .quote = try tree.car() {
-//                tree = try tree.cdr()
-//                var subTree = Value.cons(car: .symbol("quote"),
-//                                         cdr: .cons(car: token, cdr: .null))
-//                tree = .cons(car: subTree, cdr: tree)
-//                return
-//            }
+            if tree.isCons, try! tree.car().isQuote {
+                tree = try! tree.cdr()
+                tree.prepend(.cons(car: .symbol("quote"),
+                                   cdr: .cons(car: token,
+                                              cdr: .null)))
+                return
+            }
 
-            tree = Value.cons(car: token, cdr: tree)
+            tree = .cons(car: token, cdr: tree)
         }
     }
 
@@ -74,7 +73,7 @@ public final class Parser {
     }
 
     public static func parse(_ tokens: [Value]) throws -> Value {
-        var tree  = Value.null
+        var tree = Value.null
         var depth = 0
 
         for token in tokens {

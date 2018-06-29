@@ -24,9 +24,7 @@ func repl() throws {
     var tokens = [Value]()
     var lineNo = 0
     print("Schift v0.0.1")
-    defer {
-        print("\nExiting...")
-    }
+
     while let line = readLine("[\(lineNo)] Schift> ") {
         defer {
             lineNo += 1

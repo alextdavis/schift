@@ -21,4 +21,4 @@
 
 ;;Tests for negate
 ((negate null?) (quote ()))
-;((negate integer?) 2.5)
+((negate integer?) 2.5)

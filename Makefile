@@ -1,4 +1,4 @@
-.PHONY: build test xcode diffs
+.PHONY: build test xcode repl diffs
 
 build:
 	swift build
@@ -10,6 +10,9 @@ xcode:
 	osascript -e "tell application \"Xcode\" to quit"
 	swift package generate-xcodeproj
 	open Kurtscheme.xcodeproj
+
+repl: build
+	./.build/debug/Schift
 
 diffs: build
 	./.build/debug/Tokenize < testfiles/test.tokenizer.input.01 | diff - testfiles/test.tokenizer.output.01
@@ -38,3 +41,13 @@ diffs: build
 	./.build/debug/Schift testfiles/test.eval.input.14 | diff - testfiles/test.eval.output.14
 	./.build/debug/Schift testfiles/test.eval.input.15 | diff - testfiles/test.eval.output.15
 	./.build/debug/Schift testfiles/test.eval.input.16 | diff - testfiles/test.eval.output.16
+	./.build/debug/Schift testfiles/test.eval.input.17 | diff - testfiles/test.eval.output.17
+	./.build/debug/Schift testfiles/test.eval.input.18 | diff - testfiles/test.eval.output.18
+	./.build/debug/Schift testfiles/test.eval.input.19 | diff - testfiles/test.eval.output.19
+	./.build/debug/Schift testfiles/test.eval.input.20 | diff - testfiles/test.eval.output.20
+	./.build/debug/Schift testfiles/test.eval.input.21 | diff - testfiles/test.eval.output.21
+	./.build/debug/Schift testfiles/test.eval.input.22 | diff - testfiles/test.eval.output.22
+	./.build/debug/Schift testfiles/test.eval.input.23 | diff - testfiles/test.eval.output.23
+	./.build/debug/Schift testfiles/test.eval.input.24 | diff - testfiles/test.eval.output.24
+	./.build/debug/Schift testfiles/test.eval.input.25 | diff - testfiles/test.eval.output.25
+	./.build/debug/Schift testfiles/test.eval.input.26 | diff - testfiles/test.eval.output.26

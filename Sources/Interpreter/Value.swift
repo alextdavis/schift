@@ -20,22 +20,14 @@ public enum Value {
     case bool(Bool)
     case open
     case close
+    case quote
     case symbol(String)
     indirect case cons(car: Value, cdr: Value)
     indirect case procedure(formals: Value, body: Value, frame: Frame)
     case primitive(([Value]) throws -> Value)
 }
 
-extension Value {
-    public static func list(_ values: Value...) -> Value {
-        var list = Value.null
-        for value in values.reversed() {
-            list = Value.cons(car: value, cdr: list)
-        }
-        return list
-    }
-}
-
+// linked list stuff
 extension Value {
     public var isList: Bool {
         var cell = self
@@ -48,15 +40,6 @@ extension Value {
             default:
                 return false
             }
-        }
-    }
-
-    public var isNull: Bool {
-        switch self {
-        case .null:
-            return true
-        default:
-            return false
         }
     }
 
@@ -109,6 +92,14 @@ extension Value {
             }
         }
     }
+
+    public static func list(_ values: Value...) -> Value {
+        var list = Value.null
+        for value in values.reversed() {
+            list = Value.cons(car: value, cdr: list)
+        }
+        return list
+    }
 }
 
 extension Value: CustomStringConvertible {
@@ -130,9 +121,11 @@ extension Value: CustomStringConvertible {
             return "("
         case .close:
             return ")"
+        case .quote:
+            return "'"
         case .symbol(let str):
             return str
-        case .cons(car: _, cdr: _):
+        case .cons:
             var str  = "("
             var cell = self
             while true {
@@ -149,9 +142,9 @@ extension Value: CustomStringConvertible {
                     return str + ". " + cell.description + ")"
                 }
             }
-        case .procedure(formals: _, body: _, frame: _):
+        case .procedure:
             return "#<procedure>"
-        case .primitive(_):
+        case .primitive:
             return "#<primitive>"
         }
     }
@@ -162,25 +155,27 @@ extension Value: CustomStringConvertible {
             return "Null"
         case .void:
             return "Void"
-        case .int(_):
+        case .int:
             return "Int"
-        case .double(_):
+        case .double:
             return "Double"
-        case .string(_):
+        case .string:
             return "String"
-        case .bool(_):
+        case .bool:
             return "Bool"
         case .open:
             return "Open"
         case .close:
             return "Close"
-        case .symbol(_):
+        case .quote:
+            return "Quote"
+        case .symbol:
             return "Symbol"
-        case .cons(car: _, cdr: _):
+        case .cons:
             return "Cons"
-        case .procedure(formals: _, body: _, frame: _):
+        case .procedure:
             return "Procedure"
-        case .primitive(_):
+        case .primitive:
             return "Primitive"
         }
     }
@@ -199,28 +194,31 @@ extension Value: CustomStringConvertible {
     }
 }
 
-//extension Value {
-//    static func sameType(_ lhs: Value, _ rhs: Value) -> Bool {
-//        switch (lhs, rhs) {
-//        case (.null, .null),
-//             (.void, .void),
-//             (.int, .int),
-//             (.double, .double),
-//             (.string, .string),
-//             (.bool, .bool),
-//             (.open, .open),
-//             (.close, .close),
-//             (.symbol, .symbol),
-//             (.cons, .cons),
-//             (.procedure, .procedure),
-//             (.primitive, .primitive):
-//            return true
-//        default:
-//            return false
-//        }
-//    }
-//}
+/*
+extension Value {
+    static func sameType(_ lhs: Value, _ rhs: Value) -> Bool {
+        switch (lhs, rhs) {
+        case (.null, .null),
+             (.void, .void),
+             (.int, .int),
+             (.double, .double),
+             (.string, .string),
+             (.bool, .bool),
+             (.open, .open),
+             (.close, .close),
+             (.symbol, .symbol),
+             (.cons, .cons),
+             (.procedure, .procedure),
+             (.primitive, .primitive):
+            return true
+        default:
+            return false
+        }
+    }
+}
+*/
 
+// Array stuff
 extension Value {
     public func toArray() throws -> [Value] {
         var ary  = [Value]()
@@ -284,5 +282,125 @@ extension Value: Sequence {
 
     public func makeIterator() -> ValueIterator {
         return ValueIterator(self)
+    }
+}
+
+// `isNull`, etc.
+extension Value {
+    public var isNull: Bool {
+        switch self {
+        case .null:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isVoid: Bool {
+        switch self {
+        case .void:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isInt: Bool {
+        switch self {
+        case .int:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isDouble: Bool {
+        switch self {
+        case .double:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isString: Bool {
+        switch self {
+        case .string:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isBool: Bool {
+        switch self {
+        case .bool:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isOpen: Bool {
+        switch self {
+        case .open:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isClose: Bool {
+        switch self {
+        case .close:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isQuote: Bool {
+        switch self {
+        case .quote:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isSymbol: Bool {
+        switch self {
+        case .symbol:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isCons: Bool {
+        switch self {
+        case .cons:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isProcedure: Bool {
+        switch self {
+        case .procedure:
+            return true
+        default:
+            return false
+        }
+    }
+
+    public var isPrimitive: Bool {
+        switch self {
+        case .primitive:
+            return true
+        default:
+            return false
+        }
     }
 }

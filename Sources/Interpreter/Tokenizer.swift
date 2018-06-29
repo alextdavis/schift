@@ -177,7 +177,7 @@ extension Tokenizer {
     private func tokenizeSymbol() throws {
         let initial = popChar()
         assert(Tokenizer.isSymbolInitial(initial) || Tokenizer.isSign(initial),
-                "tokenizeSymbol should only be called when there's an initial or sign.")
+               "tokenizeSymbol should only be called when there's an initial or sign.")
 
         var sym = String(initial!)
 
@@ -219,7 +219,7 @@ extension Tokenizer {
         var str = startString
         let digit = popChar()
         assert(Tokenizer.isDigit(digit),
-                "tokenizeNumber should only be called when there's a digit.")
+               "tokenizeNumber should only be called when there's a digit.")
         str.append(digit!)
 
         while true {
@@ -241,25 +241,24 @@ extension Tokenizer {
     }
 
     private func tokenizeSign() throws {
-        assert(Tokenizer.isSign(peekChar()), "tokenizeSign should only be called when there's a sign.")
-
-//        print("Popped sign: \(sign)")
-//        print("Peek: \(peekChar())")
-//        print("isdelineator: \(Tokenizer.isDelineator(peekChar()))")
-//        print(list)
+        assert(Tokenizer.isSign(peekChar()),
+               "tokenizeSign should only be called when there's a sign.")
         if Tokenizer.isDelineator(peekNextChar()) {
             try tokenizeSymbol()
         } else {
             try tokenizeNumber(String(popChar()!))
         }
     }
+
+    private func tokenizeQuote() {
+        popChar()
+        array.append(.quote)
+    }
 }
 
 extension Tokenizer {
     private func tokenize() throws {
-//        var done = false
         while let c = peekChar() {
-//            let c = peekChar()
             switch c {
             case ";":
                 tokenizeComment()
@@ -269,6 +268,8 @@ extension Tokenizer {
                 try tokenizeBool()
             case "\"":
                 try tokenizeString()
+            case "'":
+                tokenizeQuote()
             case _ where Tokenizer.isSymbolInitial(c):
                 try tokenizeSymbol()
             case _ where Tokenizer.isDigit(c):
@@ -297,15 +298,17 @@ extension Value {
             return "open"
         case .close:
             return "close"
-        case .bool(_):
+        case .quote:
+            return "quote"
+        case .bool:
             return "boolean"
-        case .string(_):
+        case .string:
             return "string"
-        case .symbol(_):
+        case .symbol:
             return "symbol"
-        case .double(_):
+        case .double:
             return "double"
-        case .int(_):
+        case .int:
             return "integer"
         default:
             assertionFailure("Tried to find token name of non-token value.")
@@ -315,7 +318,7 @@ extension Value {
 
     fileprivate var tokenOutputString: String {
         switch self {
-        case .open, .close, .bool(_), .string(_), .symbol(_), .double(_), .int(_):
+        case .open, .close, .bool, .string, .symbol, .double, .int:
             return self.description + ":" + self.tokenName! + "\n"
         default:
             assertionFailure("Tried to get token output of non-token value.")

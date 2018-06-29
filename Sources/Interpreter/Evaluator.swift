@@ -287,7 +287,7 @@ public final class Evaluator {
             return try Frame.lookup(sym, env: frame)
         case .null:
             throw Err.noProc
-        case .void, .open, .close, .procedure, .primitive:
+        case .void, .open, .close, .quote, .procedure, .primitive:
             preconditionFailure(
                     "Found Void, Open, Close, Procedure, or Primitive type in Evaluator#eval")
         }

@@ -1,24 +1,18 @@
-;;Homework 4
-;;4/9/18
-
-;;Takes a two parameter function f and converts it to a curried version
-(define curry2
+(define currying
   (lambda (f)
     (lambda (x)
       (lambda (y)
         (lambda (z)
         (f x y z))))))
 
-;;Tests for curry2
-((((curry2 (lambda (x y z) (if x y z))) 7) 5) 3)
+;;Tests for currying
+((((currying (lambda (x y z) (if x y z))) 7) 5) 3)
 
-;;Takes a one parameter predicate and returns a predicate that is the negation
-;;of predicate
-(define negate
+(define weird
   (lambda (predicate)
     (lambda (x)
       (let ((predicate x)) predicate))))
 
-;;Tests for negate
-((negate (quote null?)) (quote ()))
-((negate (quote integer?)) 2.5)
+;;Tests for weird
+((weird (quote null?)) (quote ()))
+((weird (quote integer?)) 2.5)

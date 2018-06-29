@@ -173,7 +173,7 @@ public final class Evaluator {
         return result
     }
 
-    private static func apply(_ proc: Value, args: Value) throws -> Value {
+    static func apply(_ proc: Value, args: Value) throws -> Value {
         if case .primitive(let closure) = proc {
             return try closure(args.toArray())
         }

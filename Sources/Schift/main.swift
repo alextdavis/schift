@@ -14,31 +14,42 @@ import Interpreter
 
 //import func POSIX.isatty
 
+func readLine(_ prompt: String) -> String? {
+    print(prompt, terminator: "")
+    return readLine(strippingNewline: false) //TODO: Handle arrow keys, history, etc.
+}
+
 func repl() throws {
     let ipr = Interpreter()
     var tokens = [Value]()
     var lineNo = 0
     print("Schwift v0.0.1")
-    print("[\(lineNo)] Schwift>")
     defer {
-        print("Exiting...")
+        print("\nExiting...")
     }
-    while let line = readLine(strippingNewline: false) {
+    while let line = readLine("[\(lineNo)] Schwift> ") {
         defer {
             lineNo += 1
         }
         tokens = try Tokenizer(line).array
 
         while try !Parser.hasMatchingParens(tokens: tokens) {
-            print("[\(lineNo)]    ... >")
-            guard let more = readLine(strippingNewline: false) else {
+            guard let more = readLine("[\(lineNo)]    ... > ") else {
                 break
             }
 
             tokens += try Tokenizer(more).array
         }
-
-        print(try ipr.interpret(tokens: tokens))
+        do {
+            print(try ipr.interpret(tokens: tokens))
+        } catch {
+            if let kurtErr = error as? KurtError {
+                print(kurtErr.message)
+            } else {
+                print("Problematic error:")
+                print(error)
+            }
+        }
     }
 }
 

@@ -16,6 +16,19 @@ class Primitives {
         frame.bind("-", primitive: subtract)
         frame.bind("*", primitive: multiply)
         frame.bind("/", primitive: divide)
+        frame.bind("<=", primitive: leq)
+        frame.bind("=", primitive: equalsSign)
+        frame.bind("eq?", primitive: isEq)
+        frame.bind("append", primitive: append)
+        frame.bind("apply", primitive: apply)
+        frame.bind("pair?", primitive: isPair)
+        frame.bind("integer?", primitive: isInteger)
+        frame.bind("double?", primitive: isDouble)
+        frame.bind("floor", primitive: primitiveFloor)
+        frame.bind("list?", primitive: isList)
+        frame.bind("load", primitive: load)
+        frame.bind("reverse", primitive: reverse)
+        frame.bind("length", primitive: length)
     }
 
     private static func isNull(_ args: [Value]) throws -> Value {
@@ -339,10 +352,10 @@ class Primitives {
                                 found: argsList)
         }
 
-        return .void //TODO Implement apply.
+        return try Evaluator.apply(proc, args: argsList)
     }
 
-    private static func pair(_ args: [Value]) throws -> Value {
+    private static func isPair(_ args: [Value]) throws -> Value {
         guard args.count == 1 else {
             throw Err.arity(procedure: "pair?", expected: 1, given: args.count)
         }

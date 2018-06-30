@@ -18,9 +18,9 @@ public final class Evaluator {
 
         let testResult = try eval(test, frame: frame)
         if case .bool(false) = testResult {
-            return try eval(conseq, frame: frame)
-        } else {
             return try eval(alt, frame: frame)
+        } else {
+            return try eval(conseq, frame: frame)
         }
     }
 

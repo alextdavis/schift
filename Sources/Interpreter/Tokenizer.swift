@@ -20,53 +20,64 @@ public final class Tokenizer {
     }
 }
 
-extension Tokenizer {
-    private static func isWhitespace(_ c: Character?) -> Bool {
-        switch c {
-        case " ", "\n", "\r", "\t":
-            return true
-        default:
-            return false
-        }
+fileprivate func isWhitespace(_ c: Character?) -> Bool {
+    switch c {
+    case " ", "\n", "\r", "\t":
+        return true
+    default:
+        return false
     }
+}
 
-    private static func isDelineator(_ c: Character?) -> Bool {
-        switch c {
-        case "(", ")", "\"", "'", ";", nil:
-            return true
-        default:
-            return isWhitespace(c)
-        }
+fileprivate func isDelineator(_ c: Character?) -> Bool {
+    switch c {
+    case "(", ")", "\"", "'", ";", nil:
+        return true
+    default:
+        return isWhitespace(c)
     }
+}
 
-    private static func isDigit(_ c: Character?) -> Bool {
-        return c != nil && "0"..."9" ~= c!
+fileprivate func isDigit(_ c: Character?) -> Bool {
+    guard c != nil else { // Necessary to use range in the switch.
+        return false
     }
-
-    private static func isSign(_ c: Character?) -> Bool {
-        return c == "-" || c == "+"
+    switch c! {
+    case "0"..."9":
+        return true
+    default:
+        return false
     }
+}
 
-    private static func isSymbolInitial(_ c: Character?) -> Bool {
-        if c == nil {
-            return false
-        }
-        switch c! {
-        case "A"..."Z", "a"..."z",
-             "!", "$", "%", "&", "*", "/", ":", "<", "=", ">", "?", "~", "_", "`":
-            return true
-        default:
-            return false
-        }
+fileprivate func isSign(_ c: Character?) -> Bool {
+    switch c {
+    case "+", "-":
+        return true
+    default:
+        return false
     }
+}
 
-    private static func isSymbolSubsequent(_ c: Character?) -> Bool {
-        switch c {
-        case ".", "+", "-":
-            return true
-        default:
-            return isSymbolInitial(c) || isDigit(c)
-        }
+fileprivate func isSymbolInitial(_ c: Character?) -> Bool {
+    guard c != nil else {
+        return false
+    }
+    switch c! {
+    case "A"..."Z", "a"..."z",
+         "!", "$", "%", "&", "*", "/", ":", "<", "=", ">", "?", "~", "_", "`":
+        return true
+    default:
+        return false
+    }
+}
+
+fileprivate func isSymbolSubsequent(_ c: Character?) -> Bool {
+    switch c {
+    case ".", "+", "-":
+        return true
+    default:
+        return isSymbolInitial(c) || isDigit(c)
     }
 }
 
@@ -121,7 +132,7 @@ extension Tokenizer {
         let tf = popChar()
         switch tf {
         case "f", "F", "t", "T":
-            if (Tokenizer.isDelineator(peekChar())) {
+            if (isDelineator(peekChar())) {
                 array.append(.bool(tf == "t" || tf == "T"))
             } else {
                 throw Err.other("Boolean literal followed by illegal character.")
@@ -176,18 +187,18 @@ extension Tokenizer {
 
     private func tokenizeSymbol() throws {
         let initial = popChar()
-        assert(Tokenizer.isSymbolInitial(initial) || Tokenizer.isSign(initial),
+        assert(isSymbolInitial(initial) || isSign(initial),
                "tokenizeSymbol should only be called when there's an initial or sign.")
 
         var sym = String(initial!)
 
         var c: Character?
         while true {
-            if Tokenizer.isDelineator(peekChar()) { // includes `nil`
+            if isDelineator(peekChar()) { // includes `nil`
                 break;
             }
             c = popChar()
-            if !Tokenizer.isSymbolSubsequent(c) {
+            if !isSymbolSubsequent(c) {
                 throw Err.other("Illegal character `\(c!)` in symbol `\(sym)`.")
             }
             sym.append(c!)
@@ -202,7 +213,7 @@ extension Tokenizer {
         str.append(dot!)
 
         while true {
-            if Tokenizer.isDelineator(peekChar()) {
+            if isDelineator(peekChar()) {
                 break;
             }
 
@@ -216,14 +227,14 @@ extension Tokenizer {
     }
 
     private func tokenizeNumber(_ startString: String = "") throws {
-        var str = startString
+        var str   = startString
         let digit = popChar()
-        assert(Tokenizer.isDigit(digit),
+        assert(isDigit(digit),
                "tokenizeNumber should only be called when there's a digit.")
         str.append(digit!)
 
         while true {
-            if Tokenizer.isDelineator(peekChar()) {
+            if isDelineator(peekChar()) {
                 break;
             }
 
@@ -241,9 +252,9 @@ extension Tokenizer {
     }
 
     private func tokenizeSign() throws {
-        assert(Tokenizer.isSign(peekChar()),
+        assert(isSign(peekChar()),
                "tokenizeSign should only be called when there's a sign.")
-        if Tokenizer.isDelineator(peekNextChar()) {
+        if isDelineator(peekNextChar()) {
             try tokenizeSymbol()
         } else {
             try tokenizeNumber(String(popChar()!))
@@ -270,15 +281,15 @@ extension Tokenizer {
                 try tokenizeString()
             case "'":
                 tokenizeQuote()
-            case _ where Tokenizer.isSymbolInitial(c):
+            case _ where isSymbolInitial(c):
                 try tokenizeSymbol()
-            case _ where Tokenizer.isDigit(c):
+            case _ where isDigit(c):
                 try tokenizeNumber()
             case ".":
                 try tokenizeDouble()
-            case _ where Tokenizer.isSign(c):
+            case _ where isSign(c):
                 try tokenizeSign()
-            case _ where Tokenizer.isWhitespace(c):
+            case _ where isWhitespace(c):
                 _ = popChar()
             default:
                 throw Err.other("Illegal character `\(c)`.")

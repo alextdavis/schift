@@ -54,7 +54,7 @@ extension Value {
                 count += 1
                 cell = cdr
             default:
-                throw Value.Err.notList
+                throw Err.notList
             }
         }
     }
@@ -85,7 +85,7 @@ extension Value {
             case .null:
                 return reversedList
             case .cons(car:let car, cdr:let cdr):
-                reversedList = Value.cons(car: car, cdr: reversedList)
+                reversedList.prepend(car)
                 oldList = cdr
             default:
                 throw Err.notList
@@ -96,7 +96,7 @@ extension Value {
     public static func list(_ values: Value...) -> Value {
         var list = Value.null
         for value in values.reversed() {
-            list = Value.cons(car: value, cdr: list)
+            list = .cons(car: value, cdr: list)
         }
         return list
     }
@@ -237,15 +237,11 @@ extension Value {
     }
 
     public init(array ary: [Value]) {
-        var list = Value.null
-        for val in ary.reversed() {
-            list = Value.cons(car: val, cdr: list)
-        }
-        self = list
+        self.init(array: ary, tail: .null)
     }
 
-    public init(array ary: [Value], start: Value) {
-        var list = start
+    public init(array ary: [Value], tail: Value) {
+        var list = tail
         for val in ary.reversed() {
             list = .cons(car: val, cdr: list)
         }

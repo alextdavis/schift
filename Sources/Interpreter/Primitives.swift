@@ -381,7 +381,7 @@ class Primitives {
         }
 
         if last != nil {
-            return Value(array: bigAry, start: last!)
+            return Value(array: bigAry, tail: last!)
         } else {
             return Value(array: bigAry)
         }

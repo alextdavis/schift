@@ -18,8 +18,8 @@ let package = Package(
                     targets: ["Parse"]
             ),
             .executable(
-                    name: "REPL",
-                    targets: ["REPL"]
+                    name: "Benchmark",
+                    targets: ["Benchmark"]
             ),
         ],
         dependencies: [
@@ -50,7 +50,7 @@ let package = Package(
                     dependencies: ["Interpreter"]
             ),
             .target(
-                    name: "REPL",
+                    name: "Benchmark",
                     dependencies: ["Interpreter"]
             ),
             .target(

@@ -19,34 +19,42 @@ func readLine(_ prompt: String) -> String? {
     return readLine(strippingNewline: false) //TODO: Handle arrow keys, history, etc.
 }
 
+func printOnError(_ closure: () throws -> Void) {
+    do {
+        try closure()
+    } catch {
+        if let kurtErr = error as? KurtError {
+            print(kurtErr.message)
+        } else {
+            print("Problematic error:")
+            print(error)
+            exit(1)
+        }
+    }
+}
+
 func repl() throws {
-    let ipr = Interpreter.default
+    let ipr    = Interpreter.default
     var tokens = [Value]()
     var lineNo = 0
     print("Schift v0.0.1")
 
     while let line = readLine("[\(lineNo)] Schift> ") {
-        defer {
-            lineNo += 1
-        }
-        tokens = try Tokenizer(line).array
+        printOnError() {
+            defer {
+                lineNo += 1
+            }
+            tokens = try Tokenizer(line).array
 
-        while try !Parser.hasMatchingParens(tokens: tokens) {
-            guard let more = readLine("[\(lineNo)]   ... > ") else {
-                break
+            while try !Parser.hasMatchingParens(tokens: tokens) {
+                guard let more = readLine("[\(lineNo)]   ... > ") else {
+                    break
+                }
+
+                tokens += try Tokenizer(more).array
             }
 
-            tokens += try Tokenizer(more).array
-        }
-        do {
             print(try ipr.interpret(tokens: tokens).outputString)
-        } catch {
-            if let kurtErr = error as? KurtError {
-                print(kurtErr.message)
-            } else {
-                print("Problematic error:")
-                print(error)
-            }
         }
     }
 }
@@ -54,16 +62,9 @@ func repl() throws {
 func main() throws {
     if CommandLine.arguments.count > 1 {
         let ipr = Interpreter.default
-        do {
+        printOnError() {
             for path in CommandLine.arguments.dropFirst() {
                 print(try ipr.interpret(path: path).outputString)
-            }
-        } catch {
-            if let kurtErr = error as? KurtError {
-                print(kurtErr.message)
-            } else {
-                print("Problematic error:")
-                print(error)
             }
         }
         exit(0)

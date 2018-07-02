@@ -1,7 +1,10 @@
-.PHONY: build test xcode clean repl diffs
+.PHONY: build release test xcode clean repl bench diffs
 
 build:
 	swift build
+
+release:
+	swift build -c release
 
 test:
 	swift test
@@ -16,6 +19,9 @@ clean:
 
 repl: build
 	./.build/debug/Schift
+
+bench: release
+	./.build/release/Benchmark
 
 diffs: build
 	./.build/debug/Tokenize < testfiles/test.tokenizer.input.01 | diff - testfiles/test.tokenizer.output.01

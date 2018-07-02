@@ -168,7 +168,7 @@ public final class Evaluator {
         }
 
         for arg in args.dropLast() {
-            try eval(arg, frame: frame)
+            _ = try eval(arg, frame: frame)
         }
 
         return try eval(args.last!, frame: frame)

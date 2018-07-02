@@ -262,7 +262,7 @@ extension Tokenizer {
     }
 
     private func tokenizeQuote() {
-        popChar()
+        _ = popChar()
         array.append(.quote)
     }
 }

@@ -447,7 +447,7 @@ class Primitives {
                                 found: args.first!)
         }
 
-        try Interpreter.default.interpret(path: path)
+        _ = try Interpreter.default.interpret(path: path)
         return .void
     }
 

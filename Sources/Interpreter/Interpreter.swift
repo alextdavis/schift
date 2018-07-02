@@ -7,7 +7,7 @@ import Foundation
 fileprivate let LibraryPath = "./Library/"
 
 public final class Interpreter {
-    public static let `default` = Interpreter()
+    public static var `default` = Interpreter()
     private let topFrame: Frame
 
     public init() {
@@ -18,7 +18,7 @@ public final class Interpreter {
         for filename in try! FileManager.default.contentsOfDirectory(atPath: LibraryPath) {
             if filename.hasSuffix(".scm"),
                FileManager.default.isReadableFile(atPath: LibraryPath + filename) {
-                try! self.interpret(path: LibraryPath + filename)
+                _ = try! self.interpret(path: LibraryPath + filename)
             }
         }
     }

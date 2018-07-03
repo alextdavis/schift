@@ -23,6 +23,7 @@ let package = Package(
             ),
         ],
         dependencies: [
+            .package(url: "https://github.com/andybest/linenoise-swift.git", from: "0.0.3"),
         ],
         targets: [
             .target(
@@ -55,7 +56,7 @@ let package = Package(
             ),
             .target(
                     name: "Schift",
-                    dependencies: ["Interpreter"]
+                    dependencies: ["Interpreter", "LineNoise"]
             ),
             .testTarget(
                     name: "EvaluatorTests",

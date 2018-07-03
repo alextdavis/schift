@@ -4,3 +4,4 @@
 /*.xcodeproj
 .idea
 cmake-build-debug
+Package.resolved

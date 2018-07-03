@@ -11,12 +11,15 @@ import Darwin.C
 #endif
 
 import Interpreter
+import LineNoise
 
-//import func POSIX.isatty
+let ln = LineNoise()
 
 func readLine(_ prompt: String) -> String? {
-    print(prompt, terminator: "")
-    return readLine(strippingNewline: false) //TODO: Handle arrow keys, history, etc.
+    let line = try? ln.getLine(prompt: prompt)
+    ln.addHistory(line ?? "")
+    print("")
+    return line
 }
 
 func printOnError(_ closure: () throws -> Void) {

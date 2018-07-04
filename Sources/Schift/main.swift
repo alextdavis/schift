@@ -64,6 +64,13 @@ func repl() throws {
 
 func main() throws {
     if CommandLine.arguments.count > 1 {
+        for path in CommandLine.arguments.dropFirst() {
+            guard FileManager.default.isReadableFile(atPath: path) else {
+                print("Error: File `\(path)` does not exist or is not readable.")
+                exit(1)
+            }
+        }
+
         let ipr = Interpreter.default
         printOnError() {
             for path in CommandLine.arguments.dropFirst() {

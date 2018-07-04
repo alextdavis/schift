@@ -50,6 +50,7 @@ extension Evaluator {
         case procArgsNotList
         case invalidFormals
         case specialForm(String)
+        case typeError(procedure: String, expected: String, found: Value)
 
         public var message: String {
             let s = "Evaluation Error: "
@@ -76,6 +77,9 @@ extension Evaluator {
                 return s + "Formal parameters invalid."
             case .specialForm(let str):
                 return s + str
+            case .typeError(procedure:let proc, expected:let expected, found:let found):
+                return "Evaluation Type Error: `\(proc)` found value of type \(found.type); " +
+                       "expected \(expected)."
             }
         }
     }
@@ -125,7 +129,7 @@ extension Primitives {
             case .mathNonNumber(let val):
                 return s + "Tried to perform numeric operation on non-numeric type \(val.type)."
             case .typeError(procedure:let proc, expected:let expected, found:let found):
-                return "Primitive Type Error: \(proc) found value of type \(found.type); " +
+                return "Primitive Type Error: `\(proc)` found value of type \(found.type); " +
                        "expected \(expected)."
             case .divideByZero:
                 return "Divide By Zero."

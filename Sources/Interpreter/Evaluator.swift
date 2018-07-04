@@ -47,6 +47,16 @@ public final class Evaluator {
 
             let (x, e) = ary.firstTwo!
 
+            guard x.isSymbol else {
+                var name = "let"
+                if isStar {
+                    name.append("*")
+                } else if isRec {
+                    name.append("rec")
+                }
+                throw Err.typeError(procedure: name, expected: "symbol", found: x)
+            }
+
             guard try frame.lookupInSingleFrame(symbol: x) == nil else {
                 throw Err.specialForm("Duplicate identifier in `let`: `\(x)`")
             }
@@ -87,6 +97,20 @@ public final class Evaluator {
         }
 
         let (formals, body) = args.firstTwo!
+
+        if formals.isList {
+            for formal in formals {
+                guard formal.isSymbol else {
+                    throw Err.typeError(procedure: "lambda", expected: "symbol or list of symbols",
+                                        found: formal)
+                }
+            }
+        } else {
+            guard formals.isSymbol else {
+                throw Err.typeError(procedure: "lambda", expected: "symbol or list of symbols",
+                                    found: formals)
+            }
+        }
 
         return Value.procedure(formals: formals, body: body, frame: frame)
     }
@@ -179,9 +203,9 @@ public final class Evaluator {
             return try closure(actuals)
         }
 
-        guard case .procedure(formals: let formals,
-                              body: let body,
-                              frame: let parentFrame) = proc else {
+        guard case .procedure(formals:let formals,
+                              body:let body,
+                              frame:let parentFrame) = proc else {
             throw Err.notProc(proc)
         }
 
@@ -211,7 +235,7 @@ public final class Evaluator {
         switch expr {
         case .int, .double, .string, .bool:
             return expr
-        case .cons(car: let first, cdr: let cdr):
+        case .cons(car:let first, cdr:let cdr):
             let args = try! cdr.toArray()
 
             // Handle Special Forms

@@ -41,7 +41,15 @@ public final class Interpreter {
     }
 
     public func interpret(path: String) throws -> Value {
-        return try self.interpret(source: String(contentsOfFile: path))
+        let str: String
+        do {
+            str = try String(contentsOfFile: path)
+        } catch {
+            print("Error opening file `\(path)`:")
+            print(error)
+            fatalError()
+        }
+        return try self.interpret(source: str)
     }
 }
 

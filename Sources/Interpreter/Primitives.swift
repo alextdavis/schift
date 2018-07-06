@@ -41,7 +41,7 @@ class Primitives {
             throw Err.arity(procedure: "null?", expected: 1, given: args.count)
         }
 
-        return Value.bool(args.first!.isNull)
+        return .bool(args.first!.isNull)
     }
 
     private static func car(_ args: [Value]) throws -> Value {
@@ -49,8 +49,8 @@ class Primitives {
             throw Err.arity(procedure: "car", expected: 1, given: args.count)
         }
 
-        guard case .cons(car: let car, cdr: _) = args.first! else {
-            throw Err.typeError(procedure: "car", expected: "Cons Cell", found: args.first!)
+        guard case .pair(car: let car, cdr: _) = args.first! else {
+            throw Err.typeError(procedure: "car", expected: "Pair", found: args.first!)
         }
 
         return car
@@ -61,8 +61,8 @@ class Primitives {
             throw Err.arity(procedure: "cdr", expected: 1, given: args.count)
         }
 
-        guard case .cons(car: _, cdr: let cdr) = args.first! else {
-            throw Err.typeError(procedure: "cdr", expected: "Cons Cell", found: args.first!)
+        guard case .pair(car: _, cdr: let cdr) = args.first! else {
+            throw Err.typeError(procedure: "cdr", expected: "Pair", found: args.first!)
         }
 
         return cdr
@@ -73,7 +73,7 @@ class Primitives {
             throw Err.arity(procedure: "cons", expected: 2, given: args.count)
         }
 
-        return Value.cons(car: args.first!, cdr: args.dropFirst().first!)
+        return .pair(car: args.first!, cdr: args.dropFirst().first!)
     }
 
     private static func add(_ args: [Value]) throws -> Value {
@@ -98,9 +98,9 @@ class Primitives {
         }
 
         if isDouble {
-            return Value.double(sumDouble)
+            return .double(sumDouble)
         } else {
-            return Value.int(sumInt)
+            return .int(sumInt)
         }
     }
 
@@ -112,9 +112,9 @@ class Primitives {
         if args.count == 1 {
             switch args.first! {
             case .double(let dbl):
-                return Value.double(-dbl)
+                return .double(-dbl)
             case .int(let int):
-                return Value.int(-int)
+                return .int(-int)
             default:
                 throw Err.mathNonNumber(args.first!)
             }
@@ -289,7 +289,7 @@ class Primitives {
             return .bool(ldbl == rdbl)
         case (.bool(let lbool), .bool(let rbool)):
             return .bool(lbool == rbool)
-        case (.cons, .cons),
+        case (.pair, .pair),
              (.primitive, .primitive),
              (.procedure, .procedure):
             return .bool(false)
@@ -361,12 +361,7 @@ class Primitives {
             throw Err.arity(procedure: "pair?", expected: 1, given: args.count)
         }
 
-        switch args.first! {
-        case .cons:
-            return .bool(true)
-        default:
-            return .bool(false)
-        }
+        return .bool(args.first!.isPair)
     }
 
     private static func append(_ args: [Value]) throws -> Value {
@@ -406,7 +401,6 @@ class Primitives {
             throw Err.mathNonNumber(args.first!)
         }
     }
-
     private static func isInteger(_ args: [Value]) throws -> Value {
         guard args.count == 1 else {
             throw Err.arity(procedure: "integer?", expected: 1, given: args.count)

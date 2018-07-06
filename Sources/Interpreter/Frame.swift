@@ -28,7 +28,7 @@ public final class Frame {
     }
 
     public func bind(_ str: String, primitive: @escaping ([Value]) throws -> Value) {
-        self.bind(str, value: Value.primitive(primitive))
+        self.bind(str, value: .primitive(primitive))
     }
 
     private func lookupInSingleFrame(_ str: String) -> Value? {

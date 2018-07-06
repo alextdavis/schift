@@ -90,7 +90,7 @@ public final class Evaluator {
         let val = try eval(expr, frame: frame)
         try frame.bind(symbol: variable, value: val)
 
-        return Value.void
+        return .void
     }
 
     private static func evalLambda(_ args: [Value], _ frame: Frame) throws -> Value {
@@ -114,12 +114,12 @@ public final class Evaluator {
             }
         }
 
-        return Value.procedure(formals: formals, body: body, frame: frame)
+        return .procedure(formals: formals, body: body, frame: frame)
     }
 
     private static func evaLand(_ args: [Value], _ frame: Frame) throws -> Value {
         if args.count == 0 {
-            return Value.bool(true)
+            return .bool(true)
         }
 
         for arg in args.dropLast() {
@@ -140,7 +140,7 @@ public final class Evaluator {
                 return value
             }
         }
-        return Value.bool(false)
+        return .bool(false)
     }
 
     private static func evalCond(_ args: [Value], _ frame: Frame) throws -> Value {
@@ -167,7 +167,7 @@ public final class Evaluator {
             }
         }
 
-        return Value.void
+        return .void
     }
 
     private static func evalSetBang(_ args: [Value], _ frame: Frame) throws -> Value {
@@ -185,7 +185,7 @@ public final class Evaluator {
             throw Err.specialForm("Tried to `set!` unbound variable.")
         }
 
-        return Value.void
+        return .void
     }
 
     private static func evalBegin(_ args: [Value], _ frame: Frame) throws -> Value {
@@ -237,7 +237,7 @@ public final class Evaluator {
         switch expr {
         case .int, .double, .string, .bool:
             return expr
-        case .cons(car:let first, cdr:let cdr):
+        case .pair(car:let first, cdr:let cdr):
             let args = try! cdr.toArray()
 
             // Handle Special Forms

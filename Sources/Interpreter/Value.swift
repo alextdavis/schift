@@ -30,7 +30,7 @@ public enum Value {
     /// Symbol/Identifier.
     case symbol(String)
     /// Pair or Cons Cell.
-    indirect case cons(car: Value, cdr: Value)
+    indirect case pair(car: Value, cdr: Value)
     /// Procedure/closure/lambda.
     indirect case procedure(formals: Value, body: Value, frame: Frame)
     /// Primitively implemented procedure.
@@ -49,7 +49,7 @@ extension Value {
             switch cell {
             case .null:
                 return true
-            case .cons(car:_, cdr:let cdr):
+            case .pair(car:_, cdr:let cdr):
                 cell = cdr
             default:
                 return false
@@ -69,7 +69,7 @@ extension Value {
             switch cell {
             case .null:
                 return count
-            case .cons(car:_, cdr:let cdr):
+            case .pair(car:_, cdr:let cdr):
                 count += 1
                 cell = cdr
             default:
@@ -85,19 +85,19 @@ extension Value {
      */
     public func car() throws -> Value {
         switch self {
-        case .cons(car:let car, cdr:_):
+        case .pair(car:let car, cdr:_):
             return car
         default:
-            throw Err.notCons(self)
+            throw Err.notPair(self)
         }
     }
 
     public func cdr() throws -> Value {
         switch self {
-        case .cons(car:_, cdr:let cdr):
+        case .pair(car:_, cdr:let cdr):
             return cdr
         default:
-            throw Err.notCons(self)
+            throw Err.notPair(self)
         }
     }
 
@@ -108,7 +108,7 @@ extension Value {
             switch oldList {
             case .null:
                 return reversedList
-            case .cons(car:let car, cdr:let cdr):
+            case .pair(car:let car, cdr:let cdr):
                 reversedList.prepend(car)
                 oldList = cdr
             default:
@@ -120,7 +120,7 @@ extension Value {
     public static func list(_ values: Value...) -> Value {
         var list = Value.null
         for value in values.reversed() {
-            list = .cons(car: value, cdr: list)
+            list = .pair(car: value, cdr: list)
         }
         return list
     }
@@ -149,12 +149,12 @@ extension Value: CustomStringConvertible {
             return "'"
         case .symbol(let str):
             return str
-        case .cons:
+        case .pair:
             var str  = "("
             var cell = self
             while true {
                 switch cell {
-                case .cons(car:let car, cdr:let cdr):
+                case .pair(car:let car, cdr:let cdr):
                     str += car.description + " "
                     cell = cdr
                 case .null:
@@ -195,8 +195,8 @@ extension Value: CustomStringConvertible {
             return "Quote"
         case .symbol:
             return "Symbol"
-        case .cons:
-            return "Cons"
+        case .pair:
+            return "Pair"
         case .procedure:
             return "Procedure"
         case .primitive:
@@ -218,30 +218,6 @@ extension Value: CustomStringConvertible {
     }
 }
 
-/*
-extension Value {
-    static func sameType(_ lhs: Value, _ rhs: Value) -> Bool {
-        switch (lhs, rhs) {
-        case (.null, .null),
-             (.void, .void),
-             (.int, .int),
-             (.double, .double),
-             (.string, .string),
-             (.bool, .bool),
-             (.open, .open),
-             (.close, .close),
-             (.symbol, .symbol),
-             (.cons, .cons),
-             (.procedure, .procedure),
-             (.primitive, .primitive):
-            return true
-        default:
-            return false
-        }
-    }
-}
-*/
-
 // Array stuff
 extension Value {
     public func toArray() throws -> [Value] {
@@ -251,7 +227,7 @@ extension Value {
             switch cell {
             case .null:
                 return ary
-            case .cons(car:let car, cdr:let cdr):
+            case .pair(car:let car, cdr:let cdr):
                 ary.append(car)
                 cell = cdr
             default:
@@ -267,13 +243,13 @@ extension Value {
     public init(array ary: [Value], tail: Value) {
         var list = tail
         for val in ary.reversed() {
-            list = .cons(car: val, cdr: list)
+            list = .pair(car: val, cdr: list)
         }
         self = list
     }
 
     public mutating func prepend(_ new: Value) {
-        self = .cons(car: new, cdr: self)
+        self = .pair(car: new, cdr: self)
     }
 }
 
@@ -289,7 +265,7 @@ extension Value: Sequence {
             switch value {
             case .null:
                 return nil
-            case .cons(car:let car, cdr:let cdr):
+            case .pair(car:let car, cdr:let cdr):
                 defer {
                     value = cdr
                 }
@@ -397,9 +373,9 @@ extension Value {
         }
     }
 
-    public var isCons: Bool {
+    public var isPair: Bool {
         switch self {
-        case .cons:
+        case .pair:
             return true
         default:
             return false

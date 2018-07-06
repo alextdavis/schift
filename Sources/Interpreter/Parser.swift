@@ -70,7 +70,7 @@ public struct Parser {
         switch token {
         case .open:
             depth += 1
-            tree = .cons(car: token, cdr: tree)
+            tree = .pair(car: token, cdr: tree)
 
         case .close:
             depth -= 1
@@ -91,25 +91,25 @@ public struct Parser {
             tree = try! tree.cdr()
 
             // Implements lil' buddy.
-            if tree.isCons, try! tree.car().isQuote {
+            if tree.isPair, try! tree.car().isQuote {
                 tree = try! tree.cdr()
-                subTree = .cons(car: .symbol("quote"),
-                                cdr: .cons(car: subTree,
+                subTree = .pair(car: .symbol("quote"),
+                                cdr: .pair(car: subTree,
                                            cdr: .null))
             }
 
             tree.prepend(subTree)
 
         default:
-            if tree.isCons, try! tree.car().isQuote {
+            if tree.isPair, try! tree.car().isQuote {
                 tree = try! tree.cdr()
-                tree.prepend(.cons(car: .symbol("quote"),
-                                   cdr: .cons(car: token,
+                tree.prepend(.pair(car: .symbol("quote"),
+                                   cdr: .pair(car: token,
                                               cdr: .null)))
                 return
             }
 
-            tree = .cons(car: token, cdr: tree)
+            tree = .pair(car: token, cdr: tree)
         }
     }
 }

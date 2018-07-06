@@ -176,14 +176,14 @@ extension Tokenizer {
 
 extension Value {
     public enum Err: KurtError {
-        case notCons(Value)
+        case notPair(Value)
         case notList
 
         public var message: String {
             let s = "Value Error: "
             switch self {
-            case .notCons(let val):
-                return s + "Tried to take the car or cdr of a value of type \(val.type); expected Cons."
+            case .notPair(let val):
+                return s + "Tried to take the car or cdr of a value of type \(val.type); expected Pair."
             case .notList:
                 return s + "Tried to perform a list action on an improper list."
             }

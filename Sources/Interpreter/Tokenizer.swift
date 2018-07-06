@@ -1,18 +1,28 @@
 //
-//  Tokenizer.swift
-//  kurtscheme
+//  Schift
+//  The Scheme interpreter written in Swift.
+//  Created by Alex T. Davis.
+//  Based on an implementation in C by Anna S. Johnson, Eva D. Grench, and Alex T. Davis.
 //
-//  Created by Alex Davis on 5/14/18.
 //  Copyright © 2018 Alex T. Davis. All rights reserved.
 //
 
 import Foundation
 
+/**
+ * Tokenizes Scheme source
+ */
 public final class Tokenizer {
     private let input: String
     private var index: String.Index
+    
+    /// Output array of tokens.
     private(set) public var array: [Value] = []
 
+    /**
+     Create a new tokenizer from a string of Scheme source code.
+     
+     */
     public init(_ str: String) throws {
         input = str
         index = str.startIndex
@@ -82,6 +92,8 @@ fileprivate func isSymbolSubsequent(_ c: Character?) -> Bool {
 }
 
 extension Tokenizer {
+    /// Returns the current character in the input, without making modification.
+    /// If there is no more input, `nil` is returned.
     private func peekChar() -> Character? {
         guard index < input.endIndex else {
             return nil
@@ -89,6 +101,8 @@ extension Tokenizer {
         return input[index]
     }
 
+    /// Returns the next character in the input, without making modification.
+    /// If there is no more input, `nil` is returned.
     private func peekNextChar() -> Character? {
         let nextIndex = input.index(after: index)
         guard nextIndex < input.endIndex else {
@@ -97,6 +111,8 @@ extension Tokenizer {
         return input[nextIndex]
     }
 
+    /// Returns the current character in the input, then advances to the next character.
+    /// If there is no more input, `nil` is returned.
     private func popChar() -> Character? {
         if let c = peekChar() {
             index = input.index(after: index)
@@ -105,16 +121,24 @@ extension Tokenizer {
         return nil
     }
 
+    /**
+     Handles tokenization of a comment. Simply advances through the input until a newline or the
+     end of file is reached.
+     */
     private func tokenizeComment() {
-        while true {
-            let c = popChar()
-            if c == nil || c == "\n" {
+        while let c = popChar() {
+            if c == "\n" {
                 return;
             }
         }
     }
-
-    private func tokenizeParen() throws {
+    
+    /**
+     Handles tokenization of a parenthesis.
+     
+     - Precondition: The current character in the input must be an open or close parenthesis.
+     */
+    private func tokenizeParen() {
         switch popChar() {
         case "(":
             array.append(.open)
@@ -125,6 +149,13 @@ extension Tokenizer {
         }
     }
 
+    /**
+     Handles tokenization of a boolean literal.
+     
+     - Throws: `Tokenizer.Err` if an invalid Scheme token is found.
+     
+     - Precondition: The current character must be an octothorpe (`#`).
+     */
     private func tokenizeBool() throws {
         let octo = popChar()
         assert(octo == "#", "tokenizeBool should only be called when there's a `#`.")
@@ -144,6 +175,11 @@ extension Tokenizer {
         }
     }
 
+    /**
+     Handles the processing of an escape character in a Scheme string literal.
+     
+     - Throws: `Tokenizer.Err` If the escape sequence is invalid.
+     */
     private func handleEscapeChar(_ str: inout String) throws {
         let c = popChar()
         switch c {
@@ -164,6 +200,14 @@ extension Tokenizer {
         }
     }
 
+    /**
+     Handles tokenization of a string literal.
+     
+     - Throws: `Tokenizer.Err` if the string is unterminated, or contains an invalid escape
+     sequence.
+     
+     - Precondition: The current character must be a quote (`"`).
+     */
     private func tokenizeString() throws {
         let startQuote = popChar()
         assert(startQuote == "\"", "tokenizeString should only be called when there's a `\"`.")
@@ -177,7 +221,7 @@ extension Tokenizer {
                 continue
             }
             if c == nil {
-                throw Err.other("Unmatched quote; file ended mid-string.")
+                throw Err.other("Unterminated string; file ended mid-string.")
             }
             str.append(c!)
             c = popChar()
@@ -185,6 +229,13 @@ extension Tokenizer {
         array.append(.string(str))
     }
 
+    /**
+     Handles tokenization of a symbol literal.
+     
+     - Throws: `Tokenizer.Err` if an illegal character is found in the symbol.
+     
+     - Precondition: The current character is a valid initial symbol character.
+     */
     private func tokenizeSymbol() throws {
         let initial = popChar()
         assert(isSymbolInitial(initial) || isSign(initial),
@@ -206,6 +257,18 @@ extension Tokenizer {
         array.append(.symbol(sym))
     }
 
+    /**
+     Handles tokenization of a floating point literal. This is called once the integral part of the
+     number has already been processed.
+     
+     - Parameter startString: The string containing the part of the floating point literal which has
+     already been processed. By the precondition, this must be exactly the part of the literal
+     preceeding the decimal point.
+     
+     - Throws: `Tokenizer.Err` if the literal is invalid.
+     
+     - Precondition: The current character must be a period (`.`).
+     */
     private func tokenizeDouble(_ startString: String = "") throws {
         var str = startString
         let dot = popChar()
@@ -226,11 +289,22 @@ extension Tokenizer {
         array.append(.double(dbl))
     }
 
+    /**
+     Handles tokenization of a number literal. If the literal turns out to be a floating point
+     number, it will call `tokenizeDouble()` for further processing.
+     
+     - Parameter startString: The string containing the part of the number literal which has already
+     been processed. This is currently only used when the literal has a sign, in which case this
+     string contains just that sign.
+     
+     - Throws: `Tokenizer.Err` if the literal is invalid.
+     
+     - Precondition: The current character must be a digit.
+     */
     private func tokenizeNumber(_ startString: String = "") throws {
         var str   = startString
         let digit = popChar()
-        assert(isDigit(digit),
-               "tokenizeNumber should only be called when there's a digit.")
+        assert(isDigit(digit), "tokenizeNumber should only be called when there's a digit.")
         str.append(digit!)
 
         while true {
@@ -251,30 +325,47 @@ extension Tokenizer {
         array.append(.int(int))
     }
 
+    /**
+     Handles tokenization of a sign character (`+` or `-`).
+     
+     - Throws: `Tokenizer.Err` if the sign is the start of an invalid numeric literal.
+     
+     - Precondition: The current character is a sign.
+     */
     private func tokenizeSign() throws {
-        assert(isSign(peekChar()),
-               "tokenizeSign should only be called when there's a sign.")
+        assert(isSign(peekChar()), "tokenizeSign should only be called when there's a sign.")
         if isDelineator(peekNextChar()) {
-            try tokenizeSymbol()
+            try tokenizeSymbol() // Should always succeed.
         } else {
             try tokenizeNumber(String(popChar()!))
         }
     }
 
+    /**
+     Handles tokenization of a lil' buddy (`'`).
+     
+     - Precondition: The current character is a quote (`'`).
+     */
     private func tokenizeQuote() {
+        assert(peekChar() == "'", "tokenizeQuote should only be called when there's a sign.")
         _ = popChar()
         array.append(.quote)
     }
 }
 
 extension Tokenizer {
+    /**
+     Tokenizes the input.
+     
+     - Throws: `Tokenizer.Err` if the input has invalid tokens.
+     */
     private func tokenize() throws {
         while let c = peekChar() {
             switch c {
             case ";":
                 tokenizeComment()
             case "(", ")":
-                try tokenizeParen()
+                tokenizeParen()
             case "#":
                 try tokenizeBool()
             case "\"":
@@ -294,46 +385,6 @@ extension Tokenizer {
             default:
                 throw Err.other("Illegal character `\(c)`.")
             }
-        }
-    }
-
-    public var jedString: String {
-        return array.map({ $0.tokenOutputString }).joined()
-    }
-}
-
-extension Value {
-    fileprivate var tokenName: String? {
-        switch self {
-        case .open:
-            return "open"
-        case .close:
-            return "close"
-        case .quote:
-            return "quote"
-        case .bool:
-            return "boolean"
-        case .string:
-            return "string"
-        case .symbol:
-            return "symbol"
-        case .double:
-            return "double"
-        case .int:
-            return "integer"
-        default:
-            assertionFailure("Tried to find token name of non-token value.")
-            return nil
-        }
-    }
-
-    fileprivate var tokenOutputString: String {
-        switch self {
-        case .open, .close, .bool, .string, .symbol, .double, .int:
-            return self.description + ":" + self.tokenName! + "\n"
-        default:
-            assertionFailure("Tried to get token output of non-token value.")
-            return "Err:Non-token"
         }
     }
 }

@@ -12,7 +12,7 @@ test:
 xcode:
 	osascript -e "tell application \"Xcode\" to quit"
 	swift package generate-xcodeproj
-	open Kurtscheme.xcodeproj
+	open Schift.xcodeproj
 
 clean:
 	rm -r .build/

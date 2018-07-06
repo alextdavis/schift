@@ -1,8 +1,9 @@
 //
-//  LinkedList.swift
-//  kurtscheme
+//  Schift
+//  The Scheme interpreter written in Swift.
+//  Created by Alex T. Davis.
+//  Based on an implementation in C by Anna S. Johnson, Eva D. Grench, and Alex T. Davis.
 //
-//  Created by Alex Davis on 5/14/18.
 //  Copyright © 2018 Alex T. Davis. All rights reserved.
 //
 
@@ -12,23 +13,36 @@ import Foundation
 // proper list. Then have it implement protocols.
 
 public enum Value {
+    /// Null, the beginning of a proper list.
     case null
+    /// Void, the type returned by the likes of `define`.
     case void
     case int(Int)
     case double(Double)
     case string(String)
     case bool(Bool)
+    /// Open Parenthesis token.
     case open
+    /// Close Parenthesis token.
     case close
+    /// Quote (`'`) token.
     case quote
+    /// Symbol/Identifier.
     case symbol(String)
+    /// Pair or Cons Cell.
     indirect case cons(car: Value, cdr: Value)
+    /// Procedure/closure/lambda.
     indirect case procedure(formals: Value, body: Value, frame: Frame)
+    /// Primitively implemented procedure.
     case primitive(([Value]) throws -> Value)
 }
 
 // linked list stuff
 extension Value {
+    /**
+     True if `self` is a proper list. A proper list is define as either `null`, or a pair whose
+     `cdr` is a proper list.
+     */
     public var isList: Bool {
         var cell = self
         while true {
@@ -43,6 +57,11 @@ extension Value {
         }
     }
 
+    /**
+     Returns the length of the proper list `self`.
+     
+     - Throws: If `self` is not a proper list.
+     */
     public func length() throws -> Int {
         var cell  = self
         var count = 0
@@ -59,6 +78,11 @@ extension Value {
         }
     }
 
+    /**
+     Returns the car of the pair `self`.
+     
+     - Throws: If `self` is not a pair. 
+     */
     public func car() throws -> Value {
         switch self {
         case .cons(car:let car, cdr:_):

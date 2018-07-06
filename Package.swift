@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-        name: "Kurtscheme",
+        name: "Schift",
         products: [
             .executable(
                     name: "Schift",
@@ -30,24 +30,12 @@ let package = Package(
                     name: "Interpreter",
                     dependencies: []
             ),
-            .testTarget(
-                    name: "LinkedListTests",
-                    dependencies: ["Interpreter"]
-            ),
             .target(
                     name: "Tokenize",
                     dependencies: ["Interpreter"]
             ),
-            .testTarget(
-                    name: "TokenizerTests",
-                    dependencies: ["Interpreter"]
-            ),
             .target(
                     name: "Parse",
-                    dependencies: ["Interpreter"]
-            ),
-            .testTarget(
-                    name: "ParserTests",
                     dependencies: ["Interpreter"]
             ),
             .target(
@@ -57,10 +45,6 @@ let package = Package(
             .target(
                     name: "Schift",
                     dependencies: ["Interpreter", "LineNoise"]
-            ),
-            .testTarget(
-                    name: "EvaluatorTests",
-                    dependencies: ["Interpreter"]
             ),
         ]
 )

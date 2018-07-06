@@ -1,4 +1,5 @@
-- gracefully handle nonexistant filename
+- document everything
+- investigate problem with `letrec`
 
 
 - Tab Completion?
@@ -15,4 +16,3 @@
 - list functions
 - `gcd`, `lcm`, `truncate`, and `round`?
 - make functions variadic?
-

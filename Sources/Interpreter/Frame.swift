@@ -1,14 +1,15 @@
 //
-//  Frame.swift
-//  Interpreter
+//  Schift
+//  The Scheme interpreter written in Swift.
+//  Created by Alex T. Davis.
+//  Based on an implementation in C by Anna S. Johnson, Eva D. Grench, and Alex T. Davis.
 //
-//  Created by Alex Davis on 5/19/18.
+//  Copyright © 2018 Alex T. Davis. All rights reserved.
 //
-
 
 public final class Frame {
     private var bindings: [String: Value]
-    let parent: Frame?
+    public let parent: Frame?
 
     public init(parent: Frame?) {
         self.parent = parent

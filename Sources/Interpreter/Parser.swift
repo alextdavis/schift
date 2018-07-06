@@ -1,11 +1,71 @@
 //
-//  Parser.swift
-//  Interpreter
+//  Schift
+//  The Scheme interpreter written in Swift.
+//  Created by Alex T. Davis.
+//  Based on an implementation in C by Anna S. Johnson, Eva D. Grench, and Alex T. Davis.
 //
-//  Created by Alex Davis on 5/15/18.
+//  Copyright © 2018 Alex T. Davis. All rights reserved.
 //
 
-public final class Parser {
+/**
+ Parses Scheme token lists to generate an Abstract Syntax Tree.
+ */
+public struct Parser {
+    /**
+     Parses the given scheme tokens to produce an Abstract Syntax Tree.
+     
+     - Throws: `Parser.Err` if parenthesis are unmatched.
+     */
+    public static func parse(_ tokens: [Value]) throws -> Value {
+        var tree = Value.null
+        var depth = 0
+        
+        for token in tokens {
+            try addToParseTree(&tree, depth: &depth, token: token)
+        }
+        
+        if depth != 0 {
+            throw Err.unmatchedOpen
+        }
+        
+        return try! tree.reversed()
+    }
+    
+    /**
+     Checks to see if the given token list has properly matching parenthesis. Used to decide whether
+     to prompt the user for additional input in the REPL.
+     
+     - Returns:
+     `true` if the parenthesis are all properly matched.
+     `false` if there are unmatched open parenthesis.
+     
+     - Throws: `Parser.Err.unmatchedClose` if there are internal unmatched close parenthesis in the
+     token list. In this case, appending more tokens cannot remedy the invalidity.
+     */
+    public static func hasMatchingParens(tokens: [Value]) throws -> Bool {
+        var count = 0
+        for token in tokens {
+            switch token {
+            case .open:
+                count += 1
+            case .close:
+                count -= 1
+            default:
+                break
+            }
+
+            if count < 0 {
+                throw Err.unmatchedClose
+            }
+        }
+        return count == 0
+    }
+    
+    /**
+     Adds the given token to the parse tree, keeping track of depth.
+     
+     - Throws: `Parser.Err.unmatchedClose` if an unmatched closing parenthesis is found.
+     */
     private static func addToParseTree(_ tree: inout Value, depth: inout Int, token: Value) throws {
         switch token {
         case .open:
@@ -51,60 +111,5 @@ public final class Parser {
 
             tree = .cons(car: token, cdr: tree)
         }
-    }
-
-    public static func hasMatchingParens(tokens: [Value]) throws -> Bool {
-        var count = 0
-        for token in tokens {
-            switch token {
-            case .open:
-                count += 1
-            case .close:
-                count -= 1
-            default:
-                break
-            }
-
-            if count < 0 {
-                throw Err.unmatchedClose
-            }
-        }
-        return count == 0
-    }
-
-    public static func parse(_ tokens: [Value]) throws -> Value {
-        var tree = Value.null
-        var depth = 0
-
-        for token in tokens {
-            try addToParseTree(&tree, depth: &depth, token: token)
-        }
-
-        if depth != 0 {
-            throw Err.unmatchedOpen
-        }
-
-        return try! tree.reversed()
-    }
-}
-
-extension Parser {
-    public static func treeToJedString(_ tree: Value) throws -> String? {
-        return try tree.toArray().joinedStrings(separator: " ")
-    }
-}
-
-extension Value {
-    public var jedTreeString: String {
-        var str = ""
-
-        guard self.isList else {
-            preconditionFailure("Can't get the jedEvalString of a non-proper list")
-        }
-
-        for val in self {
-            str += val.description + " "
-        }
-        return str
     }
 }

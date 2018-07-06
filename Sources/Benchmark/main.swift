@@ -1,3 +1,12 @@
+//
+//  Schift
+//  The Scheme interpreter written in Swift.
+//  Created by Alex T. Davis.
+//  Based on an implementation in C by Anna S. Johnson, Eva D. Grench, and Alex T. Davis.
+//
+//  Copyright © 2018 Alex T. Davis. All rights reserved.
+//
+
 import Foundation
 import Interpreter
 

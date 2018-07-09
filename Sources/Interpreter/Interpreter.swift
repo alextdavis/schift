@@ -24,6 +24,8 @@ public final class Interpreter {
             if filename.hasSuffix(".scm"),
                FileManager.default.isReadableFile(atPath: LibraryPath + filename) {
                 _ = try! self.interpret(path: LibraryPath + filename)
+            } else {
+                print("Warning: Library file `\(filename)` could not be read.")
             }
         }
     }
@@ -55,22 +57,5 @@ public final class Interpreter {
             fatalError()
         }
         return try self.interpret(source: str)
-    }
-}
-
-extension Value {
-    public var jedEvalString: String {
-        var str = ""
-        guard self.isList else {
-            preconditionFailure("Can't get the jedEvalString of a non-proper list")
-        }
-
-        for val in self {
-            let desc = val.description
-            if desc != "" {
-                str += desc + "\n"
-            }
-        }
-        return str
     }
 }

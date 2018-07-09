@@ -27,17 +27,35 @@ func readLine(_ prompt: String) -> String? {
     return line
 }
 
+extension Value {
+    /**
+     Creates a string representation suitable for output from a list of top-level S-Expressions.
+     
+     - Precondition: `self` must be a proper list.
+     */
+    var outputString: String {
+        assert(self.isList, "Cannot print a non-list in the output format")
+        let ary = try! Array(self)
+        return ary.filter({
+            switch $0 {
+            case .void:
+                return false
+            default:
+                return true
+            }
+        }).joinedStrings(separator: "\n")
+    }
+}
+
 func printOnError(_ closure: () throws -> Void) {
     do {
         try closure()
+    } catch let error as SchiftError {
+        print(error)
     } catch {
-        if let kurtErr = error as? KurtError {
-            print(kurtErr.message)
-        } else {
-            print("Problematic error:")
-            print(error)
-            exit(1)
-        }
+        print("Problematic error:")
+        print(error)
+        exit(1)
     }
 }
 

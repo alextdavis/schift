@@ -56,8 +56,8 @@ fileprivate extension Value {
 while let line = readLine(strippingNewline: false) {
     do {
         try print(Tokenizer(line).jedString, terminator: "")
-    } catch let error as KurtError {
-        print("\nTokenizer Error: " + error.message)
+    } catch let error as SchiftError {
+        print("\nTokenizer Error: \(error)")
         break
     }
 }

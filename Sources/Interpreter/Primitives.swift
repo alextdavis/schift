@@ -348,7 +348,7 @@ class Primitives {
             throw Err.typeError(procedure: "apply", expected: "procedure or primitive", found: proc)
         }
 
-        guard let argsAry = try? argsList.toArray() else {
+        guard let argsAry = try? Array(argsList) else {
             throw Err.typeError(procedure: "apply", expected: "a list of arguments",
                                 found: argsList)
         }
@@ -369,7 +369,7 @@ class Primitives {
         var last: Value? = nil
         for arg in args {
             if arg.isList {
-                bigAry.append(contentsOf: try! arg.toArray())
+                bigAry.append(contentsOf: try! Array(arg))
             } else {
                 guard last == nil else {
                     throw Err.typeError(procedure: "append",

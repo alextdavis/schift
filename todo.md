@@ -1,5 +1,6 @@
 - document everything
 - investigate problem with `letrec`
+- ensure proper spacing of `.pair(car:_, cdr:let cdr)`
 
 
 - Tab Completion?

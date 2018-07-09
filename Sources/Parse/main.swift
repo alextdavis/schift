@@ -11,7 +11,7 @@ import Interpreter
 
 extension Parser {
     public static func treeToJedString(_ tree: Value) throws -> String? {
-        return try tree.toArray().joinedStrings(separator: " ")
+        return try Array(tree).joinedStrings(separator: " ")
     }
 }
 
@@ -36,8 +36,8 @@ while let line = readLine(strippingNewline: false) {
     do {
         try tokens += Tokenizer(line).array
 //        try print(Parser.parse(Tokenizer(line).list).jedTreeString, terminator: "")
-    } catch let error as KurtError {
-        print(error.message)
+    } catch let error as SchiftError {
+        print(error)
     }
 }
 

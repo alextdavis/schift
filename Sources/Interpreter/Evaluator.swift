@@ -10,7 +10,6 @@
 import Foundation
 
 public final class Evaluator {
-
     private static func evalIf(_ args: [Value], _ frame: Frame) throws -> Value {
         guard args.count == 3 else {
             throw Err.arity(procedure: "if", expected: 3, given: args.count)
@@ -43,7 +42,7 @@ public final class Evaluator {
         var frame = Frame(parent: parentFrame)
 
         for binding in bindings {
-            guard let ary = try? binding.toArray(), ary.count == 2 else {
+            guard let ary = try? Array(binding), ary.count == 2 else {
                 throw Err.specialForm("Each binging in `let` must be a proper list of length 2.")
             }
 
@@ -145,7 +144,7 @@ public final class Evaluator {
 
     private static func evalCond(_ args: [Value], _ frame: Frame) throws -> Value {
         for i in args.indices {
-            guard let arg = try? args[i].toArray(), arg.count == 2 else {
+            guard let arg = try? Array(args[i]), arg.count == 2 else {
                 throw Err.specialForm("Each argument to `cond` must be a proper list of length 2.")
             }
 
@@ -213,7 +212,7 @@ public final class Evaluator {
 
         let newFrame = Frame(parent: parentFrame)
 
-        if let formalAry = try? formals.toArray() {
+        if let formalAry = try? Array(formals) {
             guard formalAry.count == actuals.count else {
                 throw Err.arity(procedure: "#<procedure>", //TODO: Include procedure name?
                                 expected: formalAry.count,
@@ -238,7 +237,7 @@ public final class Evaluator {
         case .int, .double, .string, .bool:
             return expr
         case .pair(car:let first, cdr:let cdr):
-            let args = try! cdr.toArray()
+            let args = try! Array(cdr)
 
             // Handle Special Forms
             if case .symbol(let sym) = first {

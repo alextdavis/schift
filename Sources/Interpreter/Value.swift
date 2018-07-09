@@ -40,8 +40,8 @@ public enum Value {
 // linked list stuff
 extension Value {
     /**
-     True if `self` is a proper list. A proper list is define as either `null`, or a pair whose
-     `cdr` is a proper list.
+     True if the receiver is a proper list. A proper list is define as either `null`, or a
+     pair whose `cdr` is a proper list.
      */
     public var isList: Bool {
         var cell = self
@@ -58,9 +58,9 @@ extension Value {
     }
 
     /**
-     Returns the length of the proper list `self`.
+     Returns the length of the receiver (given it's a proper list).
      
-     - Throws: If `self` is not a proper list.
+     - Throws: If the receiver is not a proper list.
      */
     public func length() throws -> Int {
         var cell  = self
@@ -79,7 +79,7 @@ extension Value {
     }
 
     /**
-     Returns the car of the pair `self`.
+     Returns the car of the receiver (given it's a pair).
      
      - Throws: If `self` is not a pair. 
      */
@@ -101,6 +101,11 @@ extension Value {
         }
     }
 
+    /**
+     Returns the cdr of the receiver (given it's a pair).
+     
+     - Throws: If `self` is not a pair.
+     */
     public func reversed() throws -> Value {
         var reversedList = Value.null
         var oldList      = self
@@ -117,6 +122,10 @@ extension Value {
         }
     }
 
+    /**
+     Creates a proper list from the values given.
+     */
+    @available(*, deprecated) // TODO: Look for places where this would be useful. If none, remove.8
     public static func list(_ values: Value...) -> Value {
         var list = Value.null
         for value in values.reversed() {
@@ -134,11 +143,11 @@ extension Value: CustomStringConvertible {
         case .void:
             return ""
         case .int(let int):
-            return int.description
+            return String(int)
         case .double(let dbl):
-            return dbl.description
+            return String(dbl)
         case .string(let str):
-            return "\"" + str.description + "\""
+            return "\"" + str + "\""
         case .bool(let bool):
             return bool ? "#t" : "#f"
         case .open:
@@ -172,82 +181,59 @@ extension Value: CustomStringConvertible {
             return "#<primitive>"
         }
     }
+}
 
-    public var type: String {
-        switch self {
-        case .null:
-            return "Null"
-        case .void:
-            return "Void"
-        case .int:
-            return "Int"
-        case .double:
-            return "Double"
-        case .string:
-            return "String"
-        case .bool:
-            return "Bool"
-        case .open:
-            return "Open"
-        case .close:
-            return "Close"
-        case .quote:
-            return "Quote"
-        case .symbol:
-            return "Symbol"
-        case .pair:
-            return "Pair"
-        case .procedure:
-            return "Procedure"
-        case .primitive:
-            return "Primitive"
-        }
-    }
-
-    public var outputString: String {
-        precondition(self.isList, "Cannot print a non-list in the output format")
-        let ary = try! self.toArray()
-        return ary.filter({
-            switch $0 {
-            case .void:
-                return false
+extension Array where Element == Value {
+    /**
+     Initializes an Array from a proper list.
+     
+     - Throws: If the passed value is not a proper list.
+     */
+    public init(_ val: Value) throws {
+        var ary  = [Value]()
+        var cell = val
+        while true {
+            switch cell {
+            case .null:
+                self.init(ary)
+                return
+            case .pair(car:let car, cdr:let cdr):
+                ary.append(car)
+                cell = cdr
             default:
-                return true
+                throw Value.Err.notList
             }
-        }).joinedStrings(separator: "\n")
+        }
+        fatalError("Array initializer from value should have never exit the loop.")
     }
 }
 
 // Array stuff
 extension Value {
-    public func toArray() throws -> [Value] {
-        var ary  = [Value]()
-        var cell = self
-        while true {
-            switch cell {
-            case .null:
-                return ary
-            case .pair(car:let car, cdr:let cdr):
-                ary.append(car)
-                cell = cdr
-            default:
-                throw Err.notList
-            }
-        }
-    }
-
+    /**
+     Creates a Scheme-style proper list from a Swift array. Equivalent to calling
+     `Value(array: <arg>, tail: .null)`.
+     */
     public init(array ary: [Value]) {
         self.init(array: ary, tail: .null)
     }
 
+    /**
+     Creates a Scheme-style list from a Swift array, and the value at the end of the list (i.e. the
+     initial value before everything is cons'd onto it).
+     */
     public init(array ary: [Value], tail: Value) {
         var list = tail
         for val in ary.reversed() {
-            list = .pair(car: val, cdr: list)
+            list.prepend(val)
         }
         self = list
     }
 
+    /**
+     Cons the item given onto the receiver. Mutates the receiver to be a cons cell whose car is the
+     value passed, and whose cdr is the receiver.
+     */
     public mutating func prepend(_ new: Value) {
         self = .pair(car: new, cdr: self)
     }
@@ -265,7 +251,7 @@ extension Value: Sequence {
             switch value {
             case .null:
                 return nil
-            case .pair(car:let car, cdr:let cdr):
+            case .pair(car: let car, cdr: let cdr):
                 defer {
                     value = cdr
                 }
@@ -283,6 +269,7 @@ extension Value: Sequence {
 
 // `isNull`, etc.
 extension Value {
+    /// Returns true if the receiver is of type `null`.
     public var isNull: Bool {
         switch self {
         case .null:
@@ -292,6 +279,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `void`.
     public var isVoid: Bool {
         switch self {
         case .void:
@@ -301,6 +289,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `int`.
     public var isInt: Bool {
         switch self {
         case .int:
@@ -310,6 +299,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `double`.
     public var isDouble: Bool {
         switch self {
         case .double:
@@ -319,6 +309,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `string`.
     public var isString: Bool {
         switch self {
         case .string:
@@ -328,6 +319,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `bool`.
     public var isBool: Bool {
         switch self {
         case .bool:
@@ -337,6 +329,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `open`.
     public var isOpen: Bool {
         switch self {
         case .open:
@@ -346,6 +339,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `close`.
     public var isClose: Bool {
         switch self {
         case .close:
@@ -355,6 +349,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `quote`.
     public var isQuote: Bool {
         switch self {
         case .quote:
@@ -364,6 +359,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `symbol`.
     public var isSymbol: Bool {
         switch self {
         case .symbol:
@@ -373,6 +369,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `pair`.
     public var isPair: Bool {
         switch self {
         case .pair:
@@ -382,6 +379,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `procedure`.
     public var isProcedure: Bool {
         switch self {
         case .procedure:
@@ -391,6 +389,7 @@ extension Value {
         }
     }
 
+    /// Returns true if the receiver is of type `primitive`.
     public var isPrimitive: Bool {
         switch self {
         case .primitive:

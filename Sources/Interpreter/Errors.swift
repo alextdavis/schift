@@ -101,7 +101,7 @@ extension Evaluator {
                 if given == nil {
                     ending = "."
                 } else {
-                    ending = "; \(given!) given"
+                    ending = "; \(given!) given."
                 }
                 if proc == nil {
                     return "Arity Mismatch: The procedure takes \(exp) arguments" + ending
@@ -119,8 +119,8 @@ extension Evaluator {
             case .specialForm(let str):
                 return s + str
             case .typeError(procedure:let proc, expected:let expected, found:let found):
-                return "Evaluation Type Error: `\(proc)` found value of type \(found.typeDescription); " +
-                       "expected \(expected)."
+                return "Evaluation Type Error: `\(proc)` found value of type " +
+                       "\(found.typeDescription); expected \(expected)."
             }
         }
     }
@@ -168,10 +168,11 @@ extension Primitives {
                            + ending
                 }
             case .mathNonNumber(let val):
-                return s + "Tried to perform numeric operation on non-numeric type \(val.typeDescription)."
+                return s + "Tried to perform numeric operation on non-numeric type " +
+                       "\(val.typeDescription)."
             case .typeError(procedure:let proc, expected:let expected, found:let found):
-                return "Primitive Type Error: `\(proc)` found value of type \(found.typeDescription); " +
-                       "expected \(expected)."
+                return "Primitive Type Error: `\(proc)` found value of type " +
+                       "\(found.typeDescription); expected \(expected)."
             case .divideByZero:
                 return "Divide By Zero."
             }
@@ -189,9 +190,11 @@ extension Frame {
             let s = "Frame Error: "
             switch self {
             case .bindToNonSymbol(let val):
-                return s + "Tried to bind to a value of type \(val.typeDescription); expected Symbol."
+                return s + "Tried to bind to a value of type \(val.typeDescription); " +
+                       "expected Symbol."
             case .lookupNonSymbol(let val):
-                return s + "Tried to look up a value of type \(val.typeDescription); expected Symbol."
+                return s + "Tried to look up a value of type \(val.typeDescription); " +
+                       "expected Symbol."
             case .unboundVariable(let str):
                 return s + "Unbound variable `\(str)`."
             }
@@ -222,7 +225,8 @@ extension Value {
             let s = "Value Error: "
             switch self {
             case .notPair(let val):
-                return s + "Tried to take the car or cdr of a value of type \(val.typeDescription); expected Pair."
+                return s + "Tried to take the car or cdr of a value of type " +
+                       "\(val.typeDescription); expected Pair."
             case .notList:
                 return s + "Tried to perform a list action on an improper list."
             }

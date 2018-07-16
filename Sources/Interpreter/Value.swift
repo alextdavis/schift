@@ -9,9 +9,9 @@
 
 import Foundation
 
-//TODO IDEA: Make class which is a view into an immutable Value which it tests at runtime to be a
-// proper list. Then have it implement protocols.
-
+/**
+ Contains a Scheme value, expression, or token.
+ */
 public enum Value {
     /// Null, the beginning of a proper list.
     case null
@@ -120,18 +120,6 @@ extension Value {
                 throw Err.notList
             }
         }
-    }
-
-    /**
-     Creates a proper list from the values given.
-     */
-    @available(*, deprecated) // TODO: Look for places where this would be useful. If none, remove.8
-    public static func list(_ values: Value...) -> Value {
-        var list = Value.null
-        for value in values.reversed() {
-            list = .pair(car: value, cdr: list)
-        }
-        return list
     }
 }
 

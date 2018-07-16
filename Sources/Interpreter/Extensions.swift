@@ -9,9 +9,13 @@
 
 import Foundation
 
-extension Array where Element: CustomStringConvertible {
+extension Array {
+    /**
+     Creates strings from the elements of the array, and then joins those strings with the given
+     separator.
+     */
     public func joinedStrings(separator: String) -> String {
-        return self.map({ $0.description }).joined(separator: separator)
+        return self.map({ String(describing: $0) }).joined(separator: separator)
     }
 }
 

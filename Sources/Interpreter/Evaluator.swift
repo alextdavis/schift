@@ -49,13 +49,8 @@ public final class Evaluator {
             let (x, e) = ary.firstTwo!
 
             guard x.isSymbol else {
-                var name = "let"
-                if isStar {
-                    name.append("*")
-                } else if isRec {
-                    name.append("rec")
-                }
-                throw Err.typeError(procedure: name, expected: "symbol", found: x)
+                throw Err.typeError(procedure: "let\(isStar ? "*" : (isRec ? "rec" : ""))",
+                                    expected: "symbol", found: x)
             }
 
             guard try frame.lookupInSingleFrame(symbol: x) == nil else {
@@ -199,6 +194,10 @@ public final class Evaluator {
         return try eval(args.last!, frame: frame)
     }
 
+    /**
+     Makes a new frame, binds actuals to formals in said frame, and then evaluates the given
+     procedure in the new frame.
+     */
     static func apply(_ proc: Value, actuals: [Value]) throws -> Value {
         if case .primitive(let closure) = proc {
             return try closure(actuals)
@@ -212,7 +211,7 @@ public final class Evaluator {
 
         let newFrame = Frame(parent: parentFrame)
 
-        if let formalAry = try? Array(formals) {
+        if let formalAry = try? Array(formals) { // Not variadic
             guard formalAry.count == actuals.count else {
                 throw Err.arity(procedure: "#<procedure>", //TODO: Include procedure name?
                                 expected: formalAry.count,
@@ -232,6 +231,9 @@ public final class Evaluator {
         return try eval(body, frame: newFrame)
     }
 
+    /**
+     Evaluates the given Scheme expression in the given frame
+     */
     static func eval(_ expr: Value, frame: Frame) throws -> Value {
         switch expr {
         case .int, .double, .string, .bool:

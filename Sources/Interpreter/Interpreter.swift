@@ -30,6 +30,7 @@ public final class Interpreter {
         }
     }
 
+    /// Evaluates the given list of S-expressions.
     private func interpret(_ exprs: Value) throws -> Value {
         precondition(exprs.isList, "Interpret takes a list of expressions")
         var vals = Value.null
@@ -39,14 +40,17 @@ public final class Interpreter {
         return try vals.reversed()
     }
 
+    /// Parses, then evaluates the given array of tokens.
     public func interpret(tokens: [Value]) throws -> Value {
         return try self.interpret(Parser.parse(tokens))
     }
 
+    /// Tokenizes, parses, and evaluates the given string of Scheme source code.
     public func interpret(source: String) throws -> Value {
         return try self.interpret(tokens: Tokenizer(source).array)
     }
 
+    /// Tokenizes, parses, and evaluates the Scheme source file at the given path.
     public func interpret(path: String) throws -> Value {
         let str: String
         do {

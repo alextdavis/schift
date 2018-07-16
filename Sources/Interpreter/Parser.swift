@@ -80,7 +80,7 @@ public struct Parser {
 
             var subTree = Value.null
             while true {
-                if case .open = try! tree.car() { //TODO: Go through these `try` and move to `try!`
+                if case .open = try! tree.car() {
                     break
                 }
                 subTree.prepend(try! tree.car())
